@@ -12,9 +12,10 @@ The current version includes:
 - A responsive layout with a desktop sidebar and mobile bottom navigation.
 - Dashboard, Subscriptions, and Add New navigation.
 - An Add/Edit Subscription form that saves records locally in IndexedDB.
-- A lightweight web app manifest and service worker for the basic PWA app shell.
-
-The real subscription list, dashboard calculations, and reminder badges are intentionally reserved for later phases from the PRD.
+- A subscription list with name search, nearest-renewal sorting, edit, and confirmed delete actions.
+- A dashboard with currency-separated totals, nearest upcoming renewals, and a Needs Attention section.
+- Clear reminder and payment-status badges across dashboard and subscription cards.
+- A lightweight web app manifest and service worker with an offline app-shell fallback.
 
 ## Preview locally
 
@@ -35,6 +36,41 @@ Then open the local URL printed by Vite, usually `http://localhost:5173`.
 4. Choose **Custom** as the billing cycle if you want to test the conditional custom-cycle-days field.
 5. Select **Save subscription**. The confirmation message means the record was saved locally in IndexedDB.
 6. Select **Edit saved subscription** in the confirmation message to test updating that saved record.
+
+## Test the subscription list
+
+1. Add two or more subscriptions with different renewal dates.
+2. Choose **Subscriptions** from the navigation.
+3. Confirm that the subscription with the nearest renewal date appears first.
+4. Enter part of a subscription name in the search box to narrow the list.
+5. Select **Edit** on a card, update a field, and select **Save changes**. Return to **Subscriptions** to confirm the update.
+6. Select **Delete** on a card. Choose **Cancel** to keep the record, or choose **OK** to confirm its removal.
+
+## Test dashboard calculations
+
+1. Add subscriptions with renewal dates in the current month, within the next 7 days, within the next 30 days, and more than 30 days away.
+2. Use at least two currencies, such as IDR and USD, to confirm that totals remain separated and are not converted.
+3. Add one past renewal date, one renewal for today, one renewal 1-3 days from today, and one subscription with **Need Top Up** payment status.
+4. Choose **Dashboard** from the navigation.
+5. Confirm that the three summary cards show the expected totals by currency.
+6. Confirm that **Needs Attention** contains the overdue, today, urgent, and Need Top Up subscriptions.
+7. Confirm that **Nearest upcoming renewals** is ordered from the closest future renewal date onward.
+
+## Test visual reminder badges
+
+1. Add subscriptions with a renewal date in the past, today, 1-3 days away, 4-7 days away, 8-30 days away, and more than 30 days away.
+2. Confirm that the subscription cards show **Overdue**, **Today**, **Urgent**, **Soon**, **Upcoming**, and **Safe** reminder badges.
+3. Add subscriptions using each payment status and confirm the **Ready**, **Need Top Up**, and **Review First** badges.
+4. Confirm that overdue, today, urgent, and Need Top Up records have stronger but still simple card borders.
+5. Check both **Dashboard** and **Subscriptions** on desktop and mobile widths.
+
+## Test offline readiness
+
+1. Run `npm run build` and `npm run preview`.
+2. Open the preview URL once while online so the service worker can cache the app shell and loaded assets.
+3. In browser developer tools, switch the network setting to **Offline**.
+4. Reload the app and confirm that the interface opens and locally saved IndexedDB subscriptions remain available.
+5. Check a narrow mobile viewport and a desktop viewport to confirm that navigation, cards, badges, and empty states remain readable.
 
 ## Production preview
 

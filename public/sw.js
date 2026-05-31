@@ -1,4 +1,4 @@
-const CACHE_NAME = 'renewal-guard-lite-v1'
+const CACHE_NAME = 'renewal-guard-lite-v2'
 const APP_SHELL = ['/', '/manifest.webmanifest', '/renewal-guard-icon.svg']
 
 self.addEventListener('install', (event) => {
@@ -18,11 +18,18 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return
 
+  if (event.request.mode === 'navigate') {
+    event.respondWith(fetch(event.request).catch(() => caches.match('/')))
+    return
+  }
+
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => cachedResponse || fetch(event.request).then((response) => {
-      const responseClone = response.clone()
-      caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseClone))
+      if (response.ok) {
+        const responseClone = response.clone()
+        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseClone))
+      }
       return response
-    }).catch(() => caches.match('/'))),
+    })),
   )
 })
