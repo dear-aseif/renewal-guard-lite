@@ -15,7 +15,7 @@ The current version includes:
 - A subscription list with name search, nearest-renewal sorting, edit, and confirmed delete actions.
 - A dashboard with currency-separated totals, nearest upcoming renewals, and a Needs Attention section.
 - Clear reminder and payment-status badges across dashboard and subscription cards.
-- A lightweight web app manifest and service worker for the basic PWA app shell.
+- A lightweight web app manifest and service worker with an offline app-shell fallback.
 
 ## Preview locally
 
@@ -63,6 +63,14 @@ Then open the local URL printed by Vite, usually `http://localhost:5173`.
 3. Add subscriptions using each payment status and confirm the **Ready**, **Need Top Up**, and **Review First** badges.
 4. Confirm that overdue, today, urgent, and Need Top Up records have stronger but still simple card borders.
 5. Check both **Dashboard** and **Subscriptions** on desktop and mobile widths.
+
+## Test offline readiness
+
+1. Run `npm run build` and `npm run preview`.
+2. Open the preview URL once while online so the service worker can cache the app shell and loaded assets.
+3. In browser developer tools, switch the network setting to **Offline**.
+4. Reload the app and confirm that the interface opens and locally saved IndexedDB subscriptions remain available.
+5. Check a narrow mobile viewport and a desktop viewport to confirm that navigation, cards, badges, and empty states remain readable.
 
 ## Production preview
 

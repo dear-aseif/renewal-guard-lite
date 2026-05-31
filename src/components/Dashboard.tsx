@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { db, type Subscription } from '../db/database'
+import { EmptyState } from './EmptyState'
 import { PaymentStatusBadge, ReminderBadge } from './StatusBadge'
 import { differenceInDays, getSubscriptionBorderClass, parseLocalDate, startOfToday } from '../utils/subscriptionStatus'
 
@@ -37,12 +38,12 @@ export function Dashboard({ onAdd }: DashboardProps) {
 
   const dashboard = useMemo(() => buildDashboardData(subscriptions), [subscriptions])
 
-  if (isLoading) return <MessageCard message="Loading your renewal summary..." />
+  if (isLoading) return <EmptyState description="Reading your locally saved subscriptions." icon="storage" title="Loading your renewal summary..." />
 
   if (error) return <p className="rounded-2xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">{error}</p>
 
   if (subscriptions.length === 0) {
-    return <MessageCard action={<button className="mt-5 rounded-xl bg-teal-700 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-teal-800" onClick={onAdd} type="button">Add your first subscription</button>} message="No subscriptions saved yet. Add your first one to see your renewal summary." />
+    return <EmptyState action={<button className="mt-5 rounded-xl bg-teal-700 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-teal-800" onClick={onAdd} type="button">Add your first subscription</button>} description="Add your first subscription to see your renewal summary." icon="subscriptions" title="No subscriptions yet" />
   }
 
   return (
@@ -52,7 +53,7 @@ export function Dashboard({ onAdd }: DashboardProps) {
           <h2 className="text-lg font-bold text-slate-900">Renewal summary</h2>
           <p className="mt-1 text-sm text-slate-500">Totals stay separated by currency. No conversions are applied.</p>
         </div>
-        <div className="grid gap-4 sm:grid-cols-3">
+        <div className="grid gap-3 sm:grid-cols-3 sm:gap-4">
           <SummaryCard label="This month" totals={dashboard.thisMonth} />
           <SummaryCard label="Next 7 days" totals={dashboard.nextSevenDays} />
           <SummaryCard label="Next 30 days" totals={dashboard.nextThirtyDays} />
@@ -64,7 +65,7 @@ export function Dashboard({ onAdd }: DashboardProps) {
           <div className="grid gap-3 lg:grid-cols-2">
             {dashboard.needsAttention.map((subscription) => <RenewalCard key={subscription.id} subscription={subscription} />)}
           </div>
-        ) : <MessageCard message="Nothing needs attention right now." />}
+        ) : <EmptyState description="Your urgent renewals and top-up reminders will appear here." icon="shield" title="No items need attention" />}
       </DashboardSection>
 
       <DashboardSection description="Your closest renewal dates, sorted from nearest to furthest." title="Nearest upcoming renewals">
@@ -72,7 +73,7 @@ export function Dashboard({ onAdd }: DashboardProps) {
           <div className="grid gap-3 lg:grid-cols-2">
             {dashboard.upcoming.map((subscription) => <RenewalCard key={subscription.id} subscription={subscription} />)}
           </div>
-        ) : <MessageCard message="No upcoming renewals yet." />}
+        ) : <EmptyState description="Future renewal dates will appear here after you add them." icon="calendar" title="No upcoming renewals" />}
       </DashboardSection>
     </div>
   )
@@ -110,7 +111,7 @@ function RenewalCard({ subscription }: { subscription: Subscription }) {
 
   return (
     <article className={`rounded-2xl border bg-white p-4 shadow-card ${borderClass}`}>
-      <div className="flex items-start justify-between gap-3">
+      <div className="flex flex-col gap-3 min-[380px]:flex-row min-[380px]:items-start min-[380px]:justify-between">
         <div className="min-w-0">
           <h3 className="truncate font-bold text-slate-900">{subscription.name}</h3>
           <p className="mt-1 text-sm font-semibold text-slate-500">{formatDate(subscription.nextRenewalDate)}</p>
@@ -125,14 +126,6 @@ function RenewalCard({ subscription }: { subscription: Subscription }) {
   )
 }
 
-function MessageCard({ action, message }: { action?: ReactNode; message: string }) {
-  return (
-    <div className="rounded-3xl border border-dashed border-slate-300 bg-white px-6 py-10 text-center shadow-card">
-      <p className="mx-auto max-w-md text-sm leading-6 text-slate-500">{message}</p>
-      {action}
-    </div>
-  )
-}
 
 function buildDashboardData(subscriptions: Subscription[]) {
   const today = startOfToday()

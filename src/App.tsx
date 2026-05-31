@@ -42,8 +42,9 @@ function NavigationButton({ item, activePage, onSelect, mobile = false }: { item
 
   return (
     <button
+      aria-current={isActive ? 'page' : undefined}
       className={mobile
-        ? `flex min-w-0 flex-1 flex-col items-center gap-1 px-1 py-2 text-[11px] font-semibold transition ${isActive ? 'text-teal-700' : 'text-slate-500 hover:text-teal-700'}`
+        ? `flex min-w-0 flex-1 flex-col items-center gap-1 rounded-xl px-1 py-2.5 text-[11px] font-semibold transition ${isActive ? 'text-teal-700' : 'text-slate-500 hover:text-teal-700'}`
         : `flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold transition ${isActive ? 'bg-teal-50 text-teal-700' : 'text-slate-500 hover:bg-slate-50 hover:text-teal-700'}`}
       onClick={() => onSelect(item.id)}
       type="button"
@@ -81,7 +82,7 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-canvas pb-20 md:pb-0">
+    <div className="min-h-screen bg-canvas pb-24 md:pb-0">
       <aside className="fixed inset-y-0 left-0 hidden w-64 border-r border-slate-200 bg-white px-5 py-6 md:block">
         <Brand />
         <nav aria-label="Primary navigation" className="mt-10 space-y-2">
@@ -95,10 +96,10 @@ export default function App() {
       </aside>
 
       <main className="md:ml-64">
-        <header className="border-b border-slate-200 bg-white px-5 py-4 md:hidden">
+        <header className="sticky top-0 z-10 border-b border-slate-200 bg-white/95 px-5 py-4 backdrop-blur md:hidden">
           <Brand />
         </header>
-        <div className="mx-auto max-w-5xl px-5 py-8 sm:px-8 md:py-12 lg:px-12">
+        <div className="mx-auto max-w-5xl px-4 py-7 sm:px-8 md:py-12 lg:px-12">
           <div className="mb-7 flex items-start justify-between gap-4">
             <div>
               <p className="text-xs font-bold uppercase tracking-[0.18em] text-teal-700">{content.eyebrow}</p>
@@ -123,7 +124,7 @@ export default function App() {
         </div>
       </main>
 
-      <nav aria-label="Mobile navigation" className="fixed inset-x-0 bottom-0 z-10 flex border-t border-slate-200 bg-white/95 px-3 pb-[max(0.25rem,env(safe-area-inset-bottom))] pt-1 backdrop-blur md:hidden">
+      <nav aria-label="Mobile navigation" className="fixed inset-x-0 bottom-0 z-20 flex border-t border-slate-200 bg-white/95 px-2 pb-[max(0.35rem,env(safe-area-inset-bottom))] pt-1 backdrop-blur md:hidden">
         {navigationItems.map((item) => <NavigationButton activePage={activePage} item={item} key={item.id} mobile onSelect={navigateTo} />)}
       </nav>
     </div>

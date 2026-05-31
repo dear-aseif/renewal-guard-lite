@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useState, type ReactNode } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { db, type Subscription } from '../db/database'
+import { EmptyState } from './EmptyState'
 import { PaymentStatusBadge, ReminderBadge } from './StatusBadge'
 import { getSubscriptionBorderClass } from '../utils/subscriptionStatus'
 
@@ -56,7 +57,7 @@ export function SubscriptionList({ onAdd, onEdit }: SubscriptionListProps) {
   }
 
   if (isLoading) {
-    return <MessageCard message="Loading your saved subscriptions..." />
+    return <EmptyState description="Reading subscriptions stored on this device." icon="storage" title="Loading your subscriptions..." />
   }
 
   return (
@@ -89,9 +90,11 @@ export function SubscriptionList({ onAdd, onEdit }: SubscriptionListProps) {
           ))}
         </div>
       ) : (
-        <MessageCard
+        <EmptyState
           action={subscriptions.length === 0 ? <button className="mt-5 rounded-xl bg-teal-700 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-teal-800" onClick={onAdd} type="button">Add your first subscription</button> : undefined}
-          message={subscriptions.length === 0 ? 'No subscriptions saved yet. Add your first one to start tracking renewals.' : 'No subscriptions match your search.'}
+          description={subscriptions.length === 0 ? 'Add your first subscription to start tracking renewals.' : 'Try a different subscription name.'}
+          icon="subscriptions"
+          title={subscriptions.length === 0 ? 'No subscriptions yet' : 'No matching subscriptions'}
         />
       )}
     </section>
@@ -103,12 +106,12 @@ function SubscriptionCard({ onDelete, onEdit, subscription }: { onDelete: () => 
 
   return (
     <article className={`rounded-3xl border bg-white p-5 shadow-card ${borderClass}`}>
-      <div className="flex items-start justify-between gap-3">
+      <div className="flex flex-col gap-3 min-[420px]:flex-row min-[420px]:items-start min-[420px]:justify-between">
         <div className="min-w-0">
           <h3 className="truncate text-lg font-bold text-slate-900">{subscription.name}</h3>
           <p className="mt-1 text-sm font-bold text-teal-700">{formatPrice(subscription)}</p>
         </div>
-        <div className="flex shrink-0 flex-wrap justify-end gap-1.5">
+        <div className="flex flex-wrap gap-1.5 min-[420px]:shrink-0 min-[420px]:justify-end">
           <ReminderBadge nextRenewalDate={subscription.nextRenewalDate} />
           <PaymentStatusBadge paymentStatus={subscription.paymentStatus} />
         </div>
@@ -138,14 +141,6 @@ function Detail({ label, value }: { label: string; value: string }) {
   )
 }
 
-function MessageCard({ action, message }: { action?: ReactNode; message: string }) {
-  return (
-    <div className="rounded-3xl border border-dashed border-slate-300 bg-white px-6 py-10 text-center shadow-card">
-      <p className="mx-auto max-w-md text-sm leading-6 text-slate-500">{message}</p>
-      {action}
-    </div>
-  )
-}
 
 function formatBillingCycle(subscription: Subscription) {
   if (subscription.billingCycle === 'custom') return `Every ${subscription.customCycleDays} days`
