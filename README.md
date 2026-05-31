@@ -14,9 +14,8 @@ The current version includes:
 - An Add/Edit Subscription form that saves records locally in IndexedDB.
 - A subscription list with name search, nearest-renewal sorting, edit, and confirmed delete actions.
 - A dashboard with currency-separated totals, nearest upcoming renewals, and a Needs Attention section.
+- Clear reminder and payment-status badges across dashboard and subscription cards.
 - A lightweight web app manifest and service worker for the basic PWA app shell.
-
-The full set of visual reminder badges is intentionally reserved for the next phase from the PRD.
 
 ## Preview locally
 
@@ -56,6 +55,14 @@ Then open the local URL printed by Vite, usually `http://localhost:5173`.
 5. Confirm that the three summary cards show the expected totals by currency.
 6. Confirm that **Needs Attention** contains the overdue, today, urgent, and Need Top Up subscriptions.
 7. Confirm that **Nearest upcoming renewals** is ordered from the closest future renewal date onward.
+
+## Test visual reminder badges
+
+1. Add subscriptions with a renewal date in the past, today, 1-3 days away, 4-7 days away, 8-30 days away, and more than 30 days away.
+2. Confirm that the subscription cards show **Overdue**, **Today**, **Urgent**, **Soon**, **Upcoming**, and **Safe** reminder badges.
+3. Add subscriptions using each payment status and confirm the **Ready**, **Need Top Up**, and **Review First** badges.
+4. Confirm that overdue, today, urgent, and Need Top Up records have stronger but still simple card borders.
+5. Check both **Dashboard** and **Subscriptions** on desktop and mobile widths.
 
 ## Production preview
 

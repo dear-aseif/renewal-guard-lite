@@ -1,21 +1,11 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { db, type Subscription } from '../db/database'
+import { PaymentStatusBadge, ReminderBadge } from './StatusBadge'
+import { getSubscriptionBorderClass } from '../utils/subscriptionStatus'
 
 type SubscriptionListProps = {
   onAdd: () => void
   onEdit: (subscription: Subscription) => void
-}
-
-const paymentStatusLabels: Record<Subscription['paymentStatus'], string> = {
-  ready: 'Ready',
-  need_top_up: 'Need Top Up',
-  review_first: 'Review First',
-}
-
-const paymentStatusStyles: Record<Subscription['paymentStatus'], string> = {
-  ready: 'bg-emerald-50 text-emerald-700',
-  need_top_up: 'bg-amber-50 text-amber-700',
-  review_first: 'bg-slate-100 text-slate-600',
 }
 
 export function SubscriptionList({ onAdd, onEdit }: SubscriptionListProps) {
@@ -109,14 +99,19 @@ export function SubscriptionList({ onAdd, onEdit }: SubscriptionListProps) {
 }
 
 function SubscriptionCard({ onDelete, onEdit, subscription }: { onDelete: () => void; onEdit: () => void; subscription: Subscription }) {
+  const borderClass = getSubscriptionBorderClass(subscription)
+
   return (
-    <article className="rounded-3xl border border-slate-200 bg-white p-5 shadow-card">
+    <article className={`rounded-3xl border bg-white p-5 shadow-card ${borderClass}`}>
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <h3 className="truncate text-lg font-bold text-slate-900">{subscription.name}</h3>
           <p className="mt-1 text-sm font-bold text-teal-700">{formatPrice(subscription)}</p>
         </div>
-        <span className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-bold ${paymentStatusStyles[subscription.paymentStatus]}`}>{paymentStatusLabels[subscription.paymentStatus]}</span>
+        <div className="flex shrink-0 flex-wrap justify-end gap-1.5">
+          <ReminderBadge nextRenewalDate={subscription.nextRenewalDate} />
+          <PaymentStatusBadge paymentStatus={subscription.paymentStatus} />
+        </div>
       </div>
 
       <dl className="mt-5 grid gap-3 border-y border-slate-100 py-4 text-sm">

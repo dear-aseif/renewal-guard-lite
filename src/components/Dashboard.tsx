@@ -1,16 +1,12 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { db, type Subscription } from '../db/database'
+import { PaymentStatusBadge, ReminderBadge } from './StatusBadge'
+import { differenceInDays, getSubscriptionBorderClass, parseLocalDate, startOfToday } from '../utils/subscriptionStatus'
 
 type CurrencyTotals = Partial<Record<Subscription['currency'], number>>
 
 type DashboardProps = {
   onAdd: () => void
-}
-
-const paymentStatusLabels: Record<Subscription['paymentStatus'], string> = {
-  ready: 'Ready',
-  need_top_up: 'Need Top Up',
-  review_first: 'Review First',
 }
 
 export function Dashboard({ onAdd }: DashboardProps) {
@@ -110,21 +106,20 @@ function DashboardSection({ children, description, title }: { children: ReactNod
 }
 
 function RenewalCard({ subscription }: { subscription: Subscription }) {
-  const daysUntilRenewal = differenceInDays(subscription.nextRenewalDate)
-  const timing = getTiming(daysUntilRenewal)
+  const borderClass = getSubscriptionBorderClass(subscription)
 
   return (
-    <article className={`rounded-2xl border bg-white p-4 shadow-card ${timing.borderClass}`}>
+    <article className={`rounded-2xl border bg-white p-4 shadow-card ${borderClass}`}>
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <h3 className="truncate font-bold text-slate-900">{subscription.name}</h3>
           <p className="mt-1 text-sm font-semibold text-slate-500">{formatDate(subscription.nextRenewalDate)}</p>
         </div>
-        <span className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-bold ${timing.badgeClass}`}>{timing.label}</span>
+        <ReminderBadge nextRenewalDate={subscription.nextRenewalDate} />
       </div>
       <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 pt-3 text-sm">
         <p className="font-bold text-teal-700">{subscription.currency} {subscription.price.toLocaleString()}</p>
-        <p className={subscription.paymentStatus === 'need_top_up' ? 'font-bold text-amber-700' : 'font-semibold text-slate-500'}>{paymentStatusLabels[subscription.paymentStatus]}</p>
+        <PaymentStatusBadge paymentStatus={subscription.paymentStatus} />
       </div>
     </article>
   )
@@ -164,25 +159,6 @@ function totalByCurrency(subscriptions: Subscription[]) {
   }, {})
 }
 
-function getTiming(daysUntilRenewal: number) {
-  if (daysUntilRenewal < 0) return { badgeClass: 'bg-red-50 text-red-700', borderClass: 'border-red-200', label: 'Overdue' }
-  if (daysUntilRenewal === 0) return { badgeClass: 'bg-red-50 text-red-700', borderClass: 'border-red-200', label: 'Today' }
-  if (daysUntilRenewal <= 3) return { badgeClass: 'bg-amber-50 text-amber-700', borderClass: 'border-amber-200', label: 'Urgent' }
-  return { badgeClass: 'bg-teal-50 text-teal-700', borderClass: 'border-slate-200', label: `In ${daysUntilRenewal} days` }
-}
-
-function differenceInDays(date: string) {
-  return Math.round((parseLocalDate(date).getTime() - startOfToday().getTime()) / 86_400_000)
-}
-
-function parseLocalDate(date: string) {
-  return new Date(`${date}T00:00:00`)
-}
-
-function startOfToday() {
-  const today = new Date()
-  return new Date(today.getFullYear(), today.getMonth(), today.getDate())
-}
 
 function addDays(date: Date, days: number) {
   const result = new Date(date)
