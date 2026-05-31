@@ -13,9 +13,10 @@ The current version includes:
 - Dashboard, Subscriptions, and Add New navigation.
 - An Add/Edit Subscription form that saves records locally in IndexedDB.
 - A subscription list with name search, nearest-renewal sorting, edit, and confirmed delete actions.
+- A dashboard with currency-separated totals, nearest upcoming renewals, and a Needs Attention section.
 - A lightweight web app manifest and service worker for the basic PWA app shell.
 
-Dashboard calculations and reminder badges are intentionally reserved for later phases from the PRD.
+The full set of visual reminder badges is intentionally reserved for the next phase from the PRD.
 
 ## Preview locally
 
@@ -45,6 +46,16 @@ Then open the local URL printed by Vite, usually `http://localhost:5173`.
 4. Enter part of a subscription name in the search box to narrow the list.
 5. Select **Edit** on a card, update a field, and select **Save changes**. Return to **Subscriptions** to confirm the update.
 6. Select **Delete** on a card. Choose **Cancel** to keep the record, or choose **OK** to confirm its removal.
+
+## Test dashboard calculations
+
+1. Add subscriptions with renewal dates in the current month, within the next 7 days, within the next 30 days, and more than 30 days away.
+2. Use at least two currencies, such as IDR and USD, to confirm that totals remain separated and are not converted.
+3. Add one past renewal date, one renewal for today, one renewal 1-3 days from today, and one subscription with **Need Top Up** payment status.
+4. Choose **Dashboard** from the navigation.
+5. Confirm that the three summary cards show the expected totals by currency.
+6. Confirm that **Needs Attention** contains the overdue, today, urgent, and Need Top Up subscriptions.
+7. Confirm that **Nearest upcoming renewals** is ordered from the closest future renewal date onward.
 
 ## Production preview
 

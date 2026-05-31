@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Dashboard } from './components/Dashboard'
 import { Icon, type IconName } from './components/icons'
 import { SubscriptionForm } from './components/SubscriptionForm'
 import { SubscriptionList } from './components/SubscriptionList'
@@ -53,21 +54,6 @@ function NavigationButton({ item, activePage, onSelect, mobile = false }: { item
   )
 }
 
-function PlaceholderCard({ activePage }: { activePage: Page }) {
-  const content = pageContent[activePage]
-  const icon: IconName = activePage === 'dashboard' ? 'calendar' : activePage === 'subscriptions' ? 'subscriptions' : 'add'
-
-  return (
-    <section className="rounded-3xl border border-slate-200 bg-white px-6 py-10 text-center shadow-card sm:px-10 sm:py-14">
-      <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-teal-50 text-teal-700">
-        <Icon className="h-7 w-7" name={icon} />
-      </div>
-      <h2 className="mt-5 text-xl font-bold text-slate-800">A clear space for your renewals</h2>
-      <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-500">{content.description}</p>
-      <p className="mt-6 inline-flex rounded-full bg-amber-50 px-3 py-1 text-xs font-bold uppercase tracking-wide text-amber-700">Phase 1 foundation</p>
-    </section>
-  )
-}
 
 export default function App() {
   const [activePage, setActivePage] = useState<Page>('dashboard')
@@ -133,7 +119,7 @@ export default function App() {
             </div>
           ) : activePage === 'subscriptions' ? (
             <SubscriptionList onAdd={() => navigateTo('add')} onEdit={startEditing} />
-          ) : <PlaceholderCard activePage={activePage} />}
+          ) : <Dashboard onAdd={() => navigateTo('add')} />}
         </div>
       </main>
 

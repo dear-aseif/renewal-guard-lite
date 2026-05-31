@@ -1,0 +1,195 @@
+import { useEffect, useMemo, useState, type ReactNode } from 'react'
+import { db, type Subscription } from '../db/database'
+
+type CurrencyTotals = Partial<Record<Subscription['currency'], number>>
+
+type DashboardProps = {
+  onAdd: () => void
+}
+
+const paymentStatusLabels: Record<Subscription['paymentStatus'], string> = {
+  ready: 'Ready',
+  need_top_up: 'Need Top Up',
+  review_first: 'Review First',
+}
+
+export function Dashboard({ onAdd }: DashboardProps) {
+  const [subscriptions, setSubscriptions] = useState<Subscription[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    let isCurrent = true
+
+    async function loadSubscriptions() {
+      try {
+        const savedSubscriptions = await db.subscriptions.orderBy('nextRenewalDate').toArray()
+        if (isCurrent) setSubscriptions(savedSubscriptions)
+      } catch {
+        if (isCurrent) setError('Your dashboard could not be loaded. Please try again.')
+      } finally {
+        if (isCurrent) setIsLoading(false)
+      }
+    }
+
+    void loadSubscriptions()
+
+    return () => {
+      isCurrent = false
+    }
+  }, [])
+
+  const dashboard = useMemo(() => buildDashboardData(subscriptions), [subscriptions])
+
+  if (isLoading) return <MessageCard message="Loading your renewal summary..." />
+
+  if (error) return <p className="rounded-2xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">{error}</p>
+
+  if (subscriptions.length === 0) {
+    return <MessageCard action={<button className="mt-5 rounded-xl bg-teal-700 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-teal-800" onClick={onAdd} type="button">Add your first subscription</button>} message="No subscriptions saved yet. Add your first one to see your renewal summary." />
+  }
+
+  return (
+    <div className="space-y-8">
+      <section>
+        <div className="mb-4">
+          <h2 className="text-lg font-bold text-slate-900">Renewal summary</h2>
+          <p className="mt-1 text-sm text-slate-500">Totals stay separated by currency. No conversions are applied.</p>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-3">
+          <SummaryCard label="This month" totals={dashboard.thisMonth} />
+          <SummaryCard label="Next 7 days" totals={dashboard.nextSevenDays} />
+          <SummaryCard label="Next 30 days" totals={dashboard.nextThirtyDays} />
+        </div>
+      </section>
+
+      <DashboardSection description="Overdue, due today, urgent, or waiting for a top up." title="Needs Attention">
+        {dashboard.needsAttention.length > 0 ? (
+          <div className="grid gap-3 lg:grid-cols-2">
+            {dashboard.needsAttention.map((subscription) => <RenewalCard key={subscription.id} subscription={subscription} />)}
+          </div>
+        ) : <MessageCard message="Nothing needs attention right now." />}
+      </DashboardSection>
+
+      <DashboardSection description="Your closest renewal dates, sorted from nearest to furthest." title="Nearest upcoming renewals">
+        {dashboard.upcoming.length > 0 ? (
+          <div className="grid gap-3 lg:grid-cols-2">
+            {dashboard.upcoming.map((subscription) => <RenewalCard key={subscription.id} subscription={subscription} />)}
+          </div>
+        ) : <MessageCard message="No upcoming renewals yet." />}
+      </DashboardSection>
+    </div>
+  )
+}
+
+function SummaryCard({ label, totals }: { label: string; totals: CurrencyTotals }) {
+  const currencyTotals = Object.entries(totals) as [Subscription['currency'], number][]
+
+  return (
+    <article className="rounded-3xl border border-slate-200 bg-white p-5 shadow-card">
+      <p className="text-xs font-bold uppercase tracking-[0.16em] text-teal-700">{label}</p>
+      {currencyTotals.length > 0 ? (
+        <div className="mt-4 space-y-2">
+          {currencyTotals.map(([currency, total]) => <p className="text-xl font-bold tracking-tight text-slate-900" key={currency}>{currency} {total.toLocaleString()}</p>)}
+        </div>
+      ) : <p className="mt-4 text-xl font-bold tracking-tight text-slate-400">No renewals</p>}
+    </article>
+  )
+}
+
+function DashboardSection({ children, description, title }: { children: ReactNode; description: string; title: string }) {
+  return (
+    <section>
+      <div className="mb-4">
+        <h2 className="text-lg font-bold text-slate-900">{title}</h2>
+        <p className="mt-1 text-sm text-slate-500">{description}</p>
+      </div>
+      {children}
+    </section>
+  )
+}
+
+function RenewalCard({ subscription }: { subscription: Subscription }) {
+  const daysUntilRenewal = differenceInDays(subscription.nextRenewalDate)
+  const timing = getTiming(daysUntilRenewal)
+
+  return (
+    <article className={`rounded-2xl border bg-white p-4 shadow-card ${timing.borderClass}`}>
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <h3 className="truncate font-bold text-slate-900">{subscription.name}</h3>
+          <p className="mt-1 text-sm font-semibold text-slate-500">{formatDate(subscription.nextRenewalDate)}</p>
+        </div>
+        <span className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-bold ${timing.badgeClass}`}>{timing.label}</span>
+      </div>
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 pt-3 text-sm">
+        <p className="font-bold text-teal-700">{subscription.currency} {subscription.price.toLocaleString()}</p>
+        <p className={subscription.paymentStatus === 'need_top_up' ? 'font-bold text-amber-700' : 'font-semibold text-slate-500'}>{paymentStatusLabels[subscription.paymentStatus]}</p>
+      </div>
+    </article>
+  )
+}
+
+function MessageCard({ action, message }: { action?: ReactNode; message: string }) {
+  return (
+    <div className="rounded-3xl border border-dashed border-slate-300 bg-white px-6 py-10 text-center shadow-card">
+      <p className="mx-auto max-w-md text-sm leading-6 text-slate-500">{message}</p>
+      {action}
+    </div>
+  )
+}
+
+function buildDashboardData(subscriptions: Subscription[]) {
+  const today = startOfToday()
+  const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1)
+  const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0)
+  const inRange = (subscription: Subscription, start: Date, end: Date) => {
+    const renewalDate = parseLocalDate(subscription.nextRenewalDate)
+    return renewalDate >= start && renewalDate <= end
+  }
+
+  return {
+    thisMonth: totalByCurrency(subscriptions.filter((subscription) => inRange(subscription, startOfMonth, endOfMonth))),
+    nextSevenDays: totalByCurrency(subscriptions.filter((subscription) => inRange(subscription, today, addDays(today, 7)))),
+    nextThirtyDays: totalByCurrency(subscriptions.filter((subscription) => inRange(subscription, today, addDays(today, 30)))),
+    needsAttention: subscriptions.filter((subscription) => differenceInDays(subscription.nextRenewalDate) <= 3 || subscription.paymentStatus === 'need_top_up'),
+    upcoming: subscriptions.filter((subscription) => differenceInDays(subscription.nextRenewalDate) >= 0).slice(0, 6),
+  }
+}
+
+function totalByCurrency(subscriptions: Subscription[]) {
+  return subscriptions.reduce<CurrencyTotals>((totals, subscription) => {
+    totals[subscription.currency] = (totals[subscription.currency] ?? 0) + subscription.price
+    return totals
+  }, {})
+}
+
+function getTiming(daysUntilRenewal: number) {
+  if (daysUntilRenewal < 0) return { badgeClass: 'bg-red-50 text-red-700', borderClass: 'border-red-200', label: 'Overdue' }
+  if (daysUntilRenewal === 0) return { badgeClass: 'bg-red-50 text-red-700', borderClass: 'border-red-200', label: 'Today' }
+  if (daysUntilRenewal <= 3) return { badgeClass: 'bg-amber-50 text-amber-700', borderClass: 'border-amber-200', label: 'Urgent' }
+  return { badgeClass: 'bg-teal-50 text-teal-700', borderClass: 'border-slate-200', label: `In ${daysUntilRenewal} days` }
+}
+
+function differenceInDays(date: string) {
+  return Math.round((parseLocalDate(date).getTime() - startOfToday().getTime()) / 86_400_000)
+}
+
+function parseLocalDate(date: string) {
+  return new Date(`${date}T00:00:00`)
+}
+
+function startOfToday() {
+  const today = new Date()
+  return new Date(today.getFullYear(), today.getMonth(), today.getDate())
+}
+
+function addDays(date: Date, days: number) {
+  const result = new Date(date)
+  result.setDate(result.getDate() + days)
+  return result
+}
+
+function formatDate(date: string) {
+  return new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' }).format(parseLocalDate(date))
+}
