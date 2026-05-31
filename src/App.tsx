@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { Icon, type IconName } from './components/icons'
+import { SubscriptionForm } from './components/SubscriptionForm'
+import type { Subscription } from './db/database'
 
 type Page = 'dashboard' | 'subscriptions' | 'add'
 
@@ -29,7 +31,7 @@ const pageContent: Record<Page, { eyebrow: string; title: string; description: s
   add: {
     eyebrow: 'New record',
     title: 'Add New',
-    description: 'The simple subscription entry form will be added in the next phase.',
+    description: 'Save a subscription locally so you can keep its next renewal date close at hand.',
   },
 }
 
@@ -68,14 +70,32 @@ function PlaceholderCard({ activePage }: { activePage: Page }) {
 
 export default function App() {
   const [activePage, setActivePage] = useState<Page>('dashboard')
+  const [editingSubscription, setEditingSubscription] = useState<Subscription>()
+  const [savedSubscription, setSavedSubscription] = useState<Subscription>()
   const content = pageContent[activePage]
+
+  function navigateTo(page: Page) {
+    if (page === 'add') setEditingSubscription(undefined)
+    setActivePage(page)
+  }
+
+  function handleSaved(subscription: Subscription) {
+    setSavedSubscription(subscription)
+    setEditingSubscription(undefined)
+  }
+
+  function startEditing() {
+    if (!savedSubscription) return
+    setEditingSubscription(savedSubscription)
+    setActivePage('add')
+  }
 
   return (
     <div className="min-h-screen bg-canvas pb-20 md:pb-0">
       <aside className="fixed inset-y-0 left-0 hidden w-64 border-r border-slate-200 bg-white px-5 py-6 md:block">
         <Brand />
         <nav aria-label="Primary navigation" className="mt-10 space-y-2">
-          {navigationItems.map((item) => <NavigationButton activePage={activePage} item={item} key={item.id} onSelect={setActivePage} />)}
+          {navigationItems.map((item) => <NavigationButton activePage={activePage} item={item} key={item.id} onSelect={navigateTo} />)}
         </nav>
         <div className="absolute inset-x-5 bottom-6 rounded-2xl bg-teal-700 p-4 text-white">
           <Icon className="h-5 w-5" name="storage" />
@@ -97,12 +117,22 @@ export default function App() {
             </div>
             <div className="hidden rounded-2xl border border-teal-100 bg-teal-50 px-3 py-2 text-xs font-bold text-teal-700 sm:block">Local only</div>
           </div>
-          <PlaceholderCard activePage={activePage} />
+          {activePage === 'add' ? (
+            <div className="space-y-5">
+              {savedSubscription && (
+                <div className="flex flex-col gap-3 rounded-2xl border border-teal-100 bg-teal-50 px-4 py-3 text-sm text-teal-800 sm:flex-row sm:items-center sm:justify-between" role="status">
+                  <p><span className="font-bold">Saved locally.</span> {savedSubscription.name} is stored on this device.</p>
+                  {!editingSubscription && <button className="text-left font-bold text-teal-700 underline decoration-teal-300 underline-offset-4" onClick={startEditing} type="button">Edit saved subscription</button>}
+                </div>
+              )}
+              <SubscriptionForm onCancelEdit={() => setEditingSubscription(undefined)} onSaved={handleSaved} subscription={editingSubscription} />
+            </div>
+          ) : <PlaceholderCard activePage={activePage} />}
         </div>
       </main>
 
       <nav aria-label="Mobile navigation" className="fixed inset-x-0 bottom-0 z-10 flex border-t border-slate-200 bg-white/95 px-3 pb-[max(0.25rem,env(safe-area-inset-bottom))] pt-1 backdrop-blur md:hidden">
-        {navigationItems.map((item) => <NavigationButton activePage={activePage} item={item} key={item.id} mobile onSelect={setActivePage} />)}
+        {navigationItems.map((item) => <NavigationButton activePage={activePage} item={item} key={item.id} mobile onSelect={navigateTo} />)}
       </nav>
     </div>
   )
