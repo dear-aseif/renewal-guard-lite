@@ -2,7 +2,10 @@ import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { db, type Subscription } from '../db/database'
 import { EmptyState } from './EmptyState'
 import { PaymentStatusBadge, ReminderBadge } from './StatusBadge'
+import { markSubscriptionAsPaid } from '../utils/renewalHistory'
 import { differenceInDays, getSubscriptionBorderClass, parseLocalDate, startOfToday } from '../utils/subscriptionStatus'
+import { changeSubscriptionPaymentStatus, paymentStatusOptions } from '../utils/paymentStatus'
+import { getReminderDaysBefore } from '../utils/reminderDays'
 
 type CurrencyTotals = Partial<Record<Subscription['currency'], number>>
 
@@ -14,6 +17,8 @@ export function Dashboard({ onAdd }: DashboardProps) {
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
+  const [success, setSuccess] = useState('')
+  const [updatingPaymentStatusId, setUpdatingPaymentStatusId] = useState<string>()
 
   useEffect(() => {
     let isCurrent = true
@@ -38,16 +43,55 @@ export function Dashboard({ onAdd }: DashboardProps) {
 
   const dashboard = useMemo(() => buildDashboardData(subscriptions), [subscriptions])
 
+  async function updatePaymentStatus(subscription: Subscription, paymentStatus: Subscription['paymentStatus']) {
+    setError('')
+    setSuccess('')
+    setUpdatingPaymentStatusId(subscription.id)
+
+    try {
+      const updatedSubscription = changeSubscriptionPaymentStatus(subscription, paymentStatus)
+      await db.subscriptions.put(updatedSubscription)
+      setSubscriptions((currentSubscriptions) => currentSubscriptions.map((currentSubscription) => currentSubscription.id === updatedSubscription.id ? updatedSubscription : currentSubscription))
+      const statusLabel = paymentStatusOptions.find(({ value }) => value === paymentStatus)?.label ?? paymentStatus
+      setSuccess(`${subscription.name} payment status updated to ${statusLabel}.`)
+    } catch {
+      setError('The payment status could not be updated. Please try again.')
+    } finally {
+      setUpdatingPaymentStatusId(undefined)
+    }
+  }
+
+  async function markAsPaid(subscription: Subscription) {
+    const shouldAdvance = window.confirm(`Mark ${subscription.name} as paid and move its renewal date forward?`)
+    if (!shouldAdvance) return
+
+    setError('')
+    setSuccess('')
+
+    try {
+      const updatedSubscription = await markSubscriptionAsPaid(subscription)
+      setSubscriptions((currentSubscriptions) => currentSubscriptions
+        .map((currentSubscription) => currentSubscription.id === updatedSubscription.id ? updatedSubscription : currentSubscription)
+        .sort((first, second) => first.nextRenewalDate.localeCompare(second.nextRenewalDate)))
+      setSuccess(`${subscription.name} marked as paid. Next renewal: ${formatDate(updatedSubscription.nextRenewalDate)}.`)
+    } catch (markAsPaidError) {
+      setError(markAsPaidError instanceof Error ? markAsPaidError.message : 'The subscription could not be marked as paid. Please try again.')
+    }
+  }
+
   if (isLoading) return <EmptyState description="Reading your locally saved subscriptions." icon="storage" title="Loading your renewal summary..." />
 
-  if (error) return <p className="rounded-2xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">{error}</p>
+  if (error) return <p className="feedback-error" role="alert">{error}</p>
 
   if (subscriptions.length === 0) {
-    return <EmptyState action={<button className="mt-5 rounded-xl bg-teal-700 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-teal-800" onClick={onAdd} type="button">Add your first subscription</button>} description="Add your first subscription to see your renewal summary." icon="subscriptions" title="No subscriptions yet" />
+    return <EmptyState action={<button className="btn-primary mt-5" onClick={onAdd} type="button">Add your first subscription</button>} description="Add your first subscription to see your renewal summary." icon="subscriptions" title="No subscriptions yet" />
   }
+
+  const renderRenewalCard = (subscription: Subscription) => <RenewalCard isUpdatingPaymentStatus={updatingPaymentStatusId === subscription.id} key={subscription.id} onMarkAsPaid={() => void markAsPaid(subscription)} onPaymentStatusChange={(paymentStatus) => void updatePaymentStatus(subscription, paymentStatus)} subscription={subscription} />
 
   return (
     <div className="space-y-8">
+      {success && <p className="feedback-success" role="status">{success}</p>}
       <section>
         <div className="mb-4">
           <h2 className="text-lg font-bold text-slate-900">Renewal summary</h2>
@@ -60,30 +104,36 @@ export function Dashboard({ onAdd }: DashboardProps) {
         </div>
       </section>
 
-      <DashboardSection description="Overdue, due today, urgent, or waiting for a top up." title="Needs Attention">
-        {dashboard.needsAttention.length > 0 ? (
-          <div className="grid gap-3 lg:grid-cols-2">
-            {dashboard.needsAttention.map((subscription) => <RenewalCard key={subscription.id} subscription={subscription} />)}
-          </div>
-        ) : <EmptyState description="Your urgent renewals and top-up reminders will appear here." icon="shield" title="No items need attention" />}
+      <DashboardSection description="Overdue, due today, urgent, inside your reminder window, or waiting for a payment review." title="Needs Attention">
+        <RenewalCardGrid emptyDescription="Overdue renewals and payment reminders will appear here." emptyTitle="No items need attention" renderSubscription={renderRenewalCard} subscriptions={dashboard.needsAttention} />
       </DashboardSection>
 
-      <DashboardSection description="Your closest renewal dates, sorted from nearest to furthest." title="Nearest upcoming renewals">
-        {dashboard.upcoming.length > 0 ? (
-          <div className="grid gap-3 lg:grid-cols-2">
-            {dashboard.upcoming.map((subscription) => <RenewalCard key={subscription.id} subscription={subscription} />)}
-          </div>
-        ) : <EmptyState description="Future renewal dates will appear here after you add them." icon="calendar" title="No upcoming renewals" />}
+      <DashboardSection description="Renewals due within 7 days that do not already need attention." title="Next 7 Days">
+        <RenewalCardGrid emptyDescription="Renewals due in the next 7 days will appear here." emptyTitle="No renewals in the next 7 days" renderSubscription={renderRenewalCard} subscriptions={dashboard.nextSevenDaysGroup} />
+      </DashboardSection>
+
+      <DashboardSection description="Renewals due in 8–30 days that do not already appear above." title="Next 30 Days">
+        <RenewalCardGrid emptyDescription="Renewals due in the next 30 days will appear here." emptyTitle="No renewals in the next 30 days" renderSubscription={renderRenewalCard} subscriptions={dashboard.nextThirtyDaysGroup} />
+      </DashboardSection>
+
+      <DashboardSection description="Renewals more than 30 days away that do not already need attention." title="Later">
+        <RenewalCardGrid emptyDescription="Renewals more than 30 days away will appear here." emptyTitle="No later renewals" renderSubscription={renderRenewalCard} subscriptions={dashboard.later} />
       </DashboardSection>
     </div>
   )
+}
+
+function RenewalCardGrid({ emptyDescription, emptyTitle, renderSubscription, subscriptions }: { emptyDescription: string; emptyTitle: string; renderSubscription: (subscription: Subscription) => ReactNode; subscriptions: Subscription[] }) {
+  if (subscriptions.length === 0) return <EmptyState description={emptyDescription} icon="calendar" title={emptyTitle} />
+
+  return <div className="grid gap-3 lg:grid-cols-2">{subscriptions.map(renderSubscription)}</div>
 }
 
 function SummaryCard({ label, totals }: { label: string; totals: CurrencyTotals }) {
   const currencyTotals = Object.entries(totals) as [Subscription['currency'], number][]
 
   return (
-    <article className="rounded-3xl border border-slate-200 bg-white p-5 shadow-card">
+    <article className="ui-card p-5">
       <p className="text-xs font-bold uppercase tracking-[0.16em] text-teal-700">{label}</p>
       {currencyTotals.length > 0 ? (
         <div className="mt-4 space-y-2">
@@ -106,11 +156,11 @@ function DashboardSection({ children, description, title }: { children: ReactNod
   )
 }
 
-function RenewalCard({ subscription }: { subscription: Subscription }) {
+function RenewalCard({ isUpdatingPaymentStatus, onMarkAsPaid, onPaymentStatusChange, subscription }: { isUpdatingPaymentStatus: boolean; onMarkAsPaid: () => void; onPaymentStatusChange: (paymentStatus: Subscription['paymentStatus']) => void; subscription: Subscription }) {
   const borderClass = getSubscriptionBorderClass(subscription)
 
   return (
-    <article className={`rounded-2xl border bg-white p-4 shadow-card ${borderClass}`}>
+    <article className={`ui-card ui-card-interactive rounded-2xl p-4 ${borderClass}`}>
       <div className="flex flex-col gap-3 min-[380px]:flex-row min-[380px]:items-start min-[380px]:justify-between">
         <div className="min-w-0">
           <h3 className="truncate font-bold text-slate-900">{subscription.name}</h3>
@@ -122,6 +172,13 @@ function RenewalCard({ subscription }: { subscription: Subscription }) {
         <p className="font-bold text-teal-700">{subscription.currency} {subscription.price.toLocaleString()}</p>
         <PaymentStatusBadge paymentStatus={subscription.paymentStatus} />
       </div>
+      <label className="mt-3 block text-xs font-bold text-slate-600">
+        Quick payment status
+        <select aria-label={`Quick payment status for ${subscription.name}`} className="field-control mt-1.5 py-2.5 font-semibold text-slate-700" disabled={isUpdatingPaymentStatus} onChange={(event) => onPaymentStatusChange(event.target.value as Subscription['paymentStatus'])} value={subscription.paymentStatus}>
+          {paymentStatusOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+        </select>
+      </label>
+      <button className="btn-secondary mt-3 w-full min-h-10 py-2" onClick={onMarkAsPaid} type="button">Mark as Paid</button>
     </article>
   )
 }
@@ -136,13 +193,33 @@ function buildDashboardData(subscriptions: Subscription[]) {
     return renewalDate >= start && renewalDate <= end
   }
 
+  const needsAttention = subscriptions.filter(needsAttentionNow)
+  const needsAttentionIds = new Set(needsAttention.map(({ id }) => id))
+  const withoutAttentionItems = subscriptions.filter(({ id }) => !needsAttentionIds.has(id))
+
   return {
     thisMonth: totalByCurrency(subscriptions.filter((subscription) => inRange(subscription, startOfMonth, endOfMonth))),
     nextSevenDays: totalByCurrency(subscriptions.filter((subscription) => inRange(subscription, today, addDays(today, 7)))),
     nextThirtyDays: totalByCurrency(subscriptions.filter((subscription) => inRange(subscription, today, addDays(today, 30)))),
-    needsAttention: subscriptions.filter((subscription) => differenceInDays(subscription.nextRenewalDate) <= 3 || subscription.paymentStatus === 'need_top_up'),
-    upcoming: subscriptions.filter((subscription) => differenceInDays(subscription.nextRenewalDate) >= 0).slice(0, 6),
+    needsAttention,
+    nextSevenDaysGroup: withoutAttentionItems.filter((subscription) => inDaysRange(subscription, 0, 7)),
+    nextThirtyDaysGroup: withoutAttentionItems.filter((subscription) => inDaysRange(subscription, 8, 30)),
+    later: withoutAttentionItems.filter((subscription) => differenceInDays(subscription.nextRenewalDate) > 30),
   }
+}
+
+
+function needsAttentionNow(subscription: Subscription) {
+  const daysUntilRenewal = differenceInDays(subscription.nextRenewalDate)
+  return daysUntilRenewal <= 3
+    || daysUntilRenewal <= getReminderDaysBefore(subscription)
+    || subscription.paymentStatus === 'need_top_up'
+    || subscription.paymentStatus === 'review_first'
+}
+
+function inDaysRange(subscription: Subscription, start: number, end: number) {
+  const daysUntilRenewal = differenceInDays(subscription.nextRenewalDate)
+  return daysUntilRenewal >= start && daysUntilRenewal <= end
 }
 
 function totalByCurrency(subscriptions: Subscription[]) {

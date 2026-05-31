@@ -5,22 +5,23 @@ export type ReminderStatus = 'overdue' | 'today' | 'urgent' | 'soon' | 'upcoming
 type StatusStyle = {
   badgeClass: string
   borderClass: string
+  dotClass: string
   label: string
 }
 
 export const paymentStatusStyles: Record<Subscription['paymentStatus'], StatusStyle> = {
-  ready: { badgeClass: 'bg-emerald-50 text-emerald-700', borderClass: 'border-slate-200', label: 'Ready' },
-  need_top_up: { badgeClass: 'bg-amber-100 text-amber-800', borderClass: 'border-amber-300', label: 'Need Top Up' },
-  review_first: { badgeClass: 'bg-slate-100 text-slate-700', borderClass: 'border-slate-200', label: 'Review First' },
+  ready: { badgeClass: 'border-emerald-200 bg-emerald-50 text-emerald-700', borderClass: 'border-slate-200', dotClass: 'bg-emerald-500', label: 'Ready' },
+  need_top_up: { badgeClass: 'border-amber-300 bg-amber-50 text-amber-800', borderClass: 'border-amber-300', dotClass: 'bg-amber-500', label: 'Need Top Up' },
+  review_first: { badgeClass: 'border-violet-200 bg-violet-50 text-violet-700', borderClass: 'border-violet-200', dotClass: 'bg-violet-500', label: 'Review First' },
 }
 
 export const reminderStatusStyles: Record<ReminderStatus, StatusStyle> = {
-  overdue: { badgeClass: 'bg-red-100 text-red-800', borderClass: 'border-red-300', label: 'Overdue' },
-  today: { badgeClass: 'bg-red-100 text-red-800', borderClass: 'border-red-300', label: 'Today' },
-  urgent: { badgeClass: 'bg-amber-100 text-amber-800', borderClass: 'border-amber-300', label: 'Urgent' },
-  soon: { badgeClass: 'bg-amber-50 text-amber-700', borderClass: 'border-amber-200', label: 'Soon' },
-  upcoming: { badgeClass: 'bg-teal-50 text-teal-700', borderClass: 'border-teal-200', label: 'Upcoming' },
-  safe: { badgeClass: 'bg-slate-100 text-slate-600', borderClass: 'border-slate-200', label: 'Safe' },
+  overdue: { badgeClass: 'border-red-200 bg-red-50 text-red-700', borderClass: 'border-red-300', dotClass: 'bg-red-500', label: 'Overdue' },
+  today: { badgeClass: 'border-rose-200 bg-rose-50 text-rose-700', borderClass: 'border-rose-300', dotClass: 'bg-rose-500', label: 'Today' },
+  urgent: { badgeClass: 'border-orange-200 bg-orange-50 text-orange-700', borderClass: 'border-orange-300', dotClass: 'bg-orange-500', label: 'Urgent' },
+  soon: { badgeClass: 'border-amber-200 bg-amber-50 text-amber-700', borderClass: 'border-amber-200', dotClass: 'bg-amber-400', label: 'Soon' },
+  upcoming: { badgeClass: 'border-teal-200 bg-teal-50 text-teal-700', borderClass: 'border-teal-200', dotClass: 'bg-teal-500', label: 'Upcoming' },
+  safe: { badgeClass: 'border-slate-200 bg-slate-50 text-slate-600', borderClass: 'border-slate-200', dotClass: 'bg-slate-400', label: 'Safe' },
 }
 
 export function getReminderStatus(nextRenewalDate: string): ReminderStatus {
@@ -38,6 +39,7 @@ export function getSubscriptionBorderClass(subscription: Subscription) {
   const reminderStatus = getReminderStatus(subscription.nextRenewalDate)
   if (reminderStatus === 'overdue' || reminderStatus === 'today') return reminderStatusStyles[reminderStatus].borderClass
   if (subscription.paymentStatus === 'need_top_up') return paymentStatusStyles.need_top_up.borderClass
+  if (subscription.paymentStatus === 'review_first') return paymentStatusStyles.review_first.borderClass
   return reminderStatusStyles[reminderStatus].borderClass
 }
 

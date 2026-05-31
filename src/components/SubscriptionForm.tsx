@@ -1,9 +1,12 @@
 import { useEffect, useState, type FormEvent, type ReactNode } from 'react'
-import { db, type Subscription } from '../db/database'
+import { DEFAULT_REMINDER_DAYS_BEFORE, db, reminderDaysBeforeOptions, type ReminderDaysBefore, type RenewalHistory, type Subscription } from '../db/database'
+import { markSubscriptionAsPaid } from '../utils/renewalHistory'
+import { getReminderDaysBefore } from '../utils/reminderDays'
 
 type SubscriptionFormProps = {
   subscription?: Subscription
   onSaved: (subscription: Subscription) => void
+  onMarkedAsPaid: (subscription: Subscription) => void
   onCancelEdit: () => void
 }
 
@@ -17,6 +20,7 @@ type FormValues = {
   paymentMethod: string
   accountEmail: string
   paymentStatus: Subscription['paymentStatus']
+  reminderDaysBefore: ReminderDaysBefore
   notes: string
 }
 
@@ -30,6 +34,7 @@ const emptyForm: FormValues = {
   paymentMethod: '',
   accountEmail: '',
   paymentStatus: 'ready',
+  reminderDaysBefore: DEFAULT_REMINDER_DAYS_BEFORE,
   notes: '',
 }
 
@@ -46,14 +51,17 @@ function valuesFromSubscription(subscription?: Subscription): FormValues {
     paymentMethod: subscription.paymentMethod ?? '',
     accountEmail: subscription.accountEmail ?? '',
     paymentStatus: subscription.paymentStatus,
+    reminderDaysBefore: getReminderDaysBefore(subscription),
     notes: subscription.notes ?? '',
   }
 }
 
-export function SubscriptionForm({ subscription, onSaved, onCancelEdit }: SubscriptionFormProps) {
+export function SubscriptionForm({ subscription, onSaved, onMarkedAsPaid, onCancelEdit }: SubscriptionFormProps) {
   const [values, setValues] = useState<FormValues>(() => valuesFromSubscription(subscription))
   const [error, setError] = useState('')
   const [isSaving, setIsSaving] = useState(false)
+  const [renewalHistory, setRenewalHistory] = useState<RenewalHistory[]>([])
+  const [isHistoryLoading, setIsHistoryLoading] = useState(false)
   const isEditing = Boolean(subscription)
 
   useEffect(() => {
@@ -61,8 +69,53 @@ export function SubscriptionForm({ subscription, onSaved, onCancelEdit }: Subscr
     setError('')
   }, [subscription])
 
+  useEffect(() => {
+    let isCurrent = true
+
+    async function loadRenewalHistory() {
+      if (!subscription) {
+        setRenewalHistory([])
+        return
+      }
+
+      setIsHistoryLoading(true)
+      try {
+        const history = await db.renewalHistory.where('subscriptionId').equals(subscription.id).toArray()
+        if (isCurrent) setRenewalHistory(history.sort((first, second) => second.paidDate.localeCompare(first.paidDate)))
+      } catch {
+        if (isCurrent) setError('Renewal history could not be loaded. Please try again.')
+      } finally {
+        if (isCurrent) setIsHistoryLoading(false)
+      }
+    }
+
+    void loadRenewalHistory()
+
+    return () => {
+      isCurrent = false
+    }
+  }, [subscription])
+
   function updateValue<Key extends keyof FormValues>(key: Key, value: FormValues[Key]) {
     setValues((currentValues) => ({ ...currentValues, [key]: value }))
+  }
+
+  async function markAsPaid() {
+    if (!subscription) return
+    const shouldAdvance = window.confirm(`Mark ${subscription.name} as paid and move its renewal date forward?`)
+    if (!shouldAdvance) return
+
+    setError('')
+    setIsSaving(true)
+
+    try {
+      const updatedSubscription = await markSubscriptionAsPaid(subscription)
+      onMarkedAsPaid(updatedSubscription)
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'The subscription could not be marked as paid. Please try again.')
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -102,6 +155,7 @@ export function SubscriptionForm({ subscription, onSaved, onCancelEdit }: Subscr
         ...(values.paymentMethod.trim() ? { paymentMethod: values.paymentMethod.trim() } : {}),
         ...(values.accountEmail.trim() ? { accountEmail: values.accountEmail.trim() } : {}),
         paymentStatus: values.paymentStatus,
+        reminderDaysBefore: values.reminderDaysBefore,
         ...(values.notes.trim() ? { notes: values.notes.trim() } : {}),
         createdAt: subscription?.createdAt ?? now,
         updatedAt: now,
@@ -123,13 +177,13 @@ export function SubscriptionForm({ subscription, onSaved, onCancelEdit }: Subscr
   }
 
   return (
-    <form className="space-y-6 rounded-3xl border border-slate-200 bg-white p-5 shadow-card sm:p-7" onSubmit={handleSubmit}>
+    <form className="ui-card space-y-6 p-4 sm:p-7" onSubmit={handleSubmit}>
       <div className="border-b border-slate-100 pb-5">
         <h2 className="text-lg font-bold text-slate-900">{isEditing ? 'Edit subscription' : 'Subscription details'}</h2>
         <p className="mt-1 text-sm leading-6 text-slate-500">Required fields are marked with an asterisk. Your data is saved locally on this device.</p>
       </div>
 
-      {error && <p className="rounded-2xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">{error}</p>}
+      {error && <p className="feedback-error" role="alert">{error}</p>}
 
       <div className="grid gap-5 sm:grid-cols-2">
         <Field className="sm:col-span-2" label="Name" required>
@@ -175,14 +229,34 @@ export function SubscriptionForm({ subscription, onSaved, onCancelEdit }: Subscr
             <option value="review_first">Review First</option>
           </select>
         </Field>
+        <Field label="Remind me before renewal" required>
+          <select className={inputClassName} onChange={(event) => updateValue('reminderDaysBefore', Number(event.target.value) as ReminderDaysBefore)} value={values.reminderDaysBefore}>
+            {reminderDaysBeforeOptions.map((days) => <option key={days} value={days}>{days} day{days === 1 ? '' : 's'} before</option>)}
+          </select>
+        </Field>
         <Field className="sm:col-span-2" label="Notes">
           <textarea className={`${inputClassName} min-h-28 resize-y`} onChange={(event) => updateValue('notes', event.target.value)} placeholder="Optional notes about this subscription" value={values.notes} />
         </Field>
       </div>
 
-      <div className="flex flex-col-reverse gap-3 border-t border-slate-100 pt-5 sm:flex-row sm:justify-end">
-        {isEditing && <button className="rounded-xl px-4 py-3 text-sm font-bold text-slate-600 transition hover:bg-slate-100" onClick={onCancelEdit} type="button">Cancel edit</button>}
-        <button className="rounded-xl bg-teal-700 px-5 py-3 text-sm font-bold text-white transition hover:bg-teal-800 disabled:cursor-not-allowed disabled:opacity-60" disabled={isSaving} type="submit">
+      {isEditing && (
+        <section className="border-t border-slate-100 pt-5">
+          <h3 className="text-base font-bold text-slate-900">Renewal history</h3>
+          <p className="mt-1 text-sm leading-6 text-slate-500">Manual payments recorded locally on this device.</p>
+          {isHistoryLoading ? (
+            <p className="mt-4 text-sm font-semibold text-slate-500">Loading renewal history...</p>
+          ) : renewalHistory.length > 0 ? (
+            <div className="mt-4 space-y-3">
+              {renewalHistory.map((history) => <RenewalHistoryItem history={history} key={history.id} />)}
+            </div>
+          ) : <p className="mt-4 rounded-2xl bg-slate-50 px-4 py-3 text-sm text-slate-500">No renewal history yet. Mark this subscription as paid to add the first record.</p>}
+        </section>
+      )}
+
+      <div className="flex flex-col-reverse gap-3 border-t border-slate-100 pt-5 sm:flex-row sm:flex-wrap sm:justify-end">
+        {isEditing && <button className="btn-ghost min-h-11 px-4" onClick={onCancelEdit} type="button">Cancel edit</button>}
+        {isEditing && <button className="btn-secondary" disabled={isSaving} onClick={() => void markAsPaid()} type="button">Mark as Paid</button>}
+        <button className="btn-primary px-5" disabled={isSaving} type="submit">
           {isSaving ? 'Saving...' : isEditing ? 'Save changes' : 'Save subscription'}
         </button>
       </div>
@@ -190,7 +264,7 @@ export function SubscriptionForm({ subscription, onSaved, onCancelEdit }: Subscr
   )
 }
 
-const inputClassName = 'mt-2 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-teal-600 focus:ring-2 focus:ring-teal-100'
+const inputClassName = 'field-control mt-2'
 
 function Field({ children, className = '', label, required = false }: { children: ReactNode; className?: string; label: string; required?: boolean }) {
   return (
@@ -199,4 +273,25 @@ function Field({ children, className = '', label, required = false }: { children
       {children}
     </label>
   )
+}
+
+
+function RenewalHistoryItem({ history }: { history: RenewalHistory }) {
+  return (
+    <article className="rounded-2xl border border-slate-200/80 bg-slate-50/70 px-4 py-3">
+      <div className="flex flex-col gap-1 min-[420px]:flex-row min-[420px]:items-center min-[420px]:justify-between">
+        <p className="text-sm font-bold text-slate-800">{history.currency} {history.amount.toLocaleString()}</p>
+        <p className="text-xs font-semibold text-slate-500">Paid {formatDateTime(history.paidDate)}</p>
+      </div>
+      <p className="mt-2 text-sm text-slate-600">Renewal moved from <span className="font-semibold">{formatDate(history.previousRenewalDate)}</span> to <span className="font-semibold">{formatDate(history.nextRenewalDate)}</span>.</p>
+    </article>
+  )
+}
+
+function formatDate(date: string) {
+  return new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' }).format(new Date(`${date}T00:00:00`))
+}
+
+function formatDateTime(date: string) {
+  return new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(date))
 }

@@ -13,9 +13,15 @@ The current version includes:
 - Dashboard, Subscriptions, and Add New navigation.
 - An Add/Edit Subscription form that saves records locally in IndexedDB.
 - A subscription list with name search, nearest-renewal sorting, edit, and confirmed delete actions.
-- A dashboard with currency-separated totals, nearest upcoming renewals, and a Needs Attention section.
+- A dashboard with currency-separated totals and clear, non-duplicating Needs Attention, Next 7 Days, Next 30 Days, and Later groups.
 - Clear reminder and payment-status badges across dashboard and subscription cards.
+- Manual local JSON backup and restore with a 14-day backup recommendation.
+- A manual Mark as Paid action that advances the next renewal date and resets payment readiness.
+- A quick payment-status selector on subscription cards for immediate local updates.
+- A per-subscription visual reminder window with 1, 3, 7, 14, or 30-day options.
+- A simple local renewal history created whenever a subscription is marked as paid.
 - A lightweight web app manifest and service worker with an offline app-shell fallback.
+- A calm, mobile-first personal-finance visual style with clearer cards, buttons, status chips, and empty states.
 
 ## Preview locally
 
@@ -63,6 +69,76 @@ Then open the local URL printed by Vite, usually `http://localhost:5173`.
 3. Add subscriptions using each payment status and confirm the **Ready**, **Need Top Up**, and **Review First** badges.
 4. Confirm that overdue, today, urgent, and Need Top Up records have stronger but still simple card borders.
 5. Check both **Dashboard** and **Subscriptions** on desktop and mobile widths.
+
+## Test Mark as Paid
+
+1. Add weekly, monthly, yearly, and custom subscriptions with known renewal dates. Set at least one payment status to **Need Top Up**.
+2. Open **Subscriptions**, select **Mark as Paid** on a card, and choose **Cancel** in the confirmation prompt. Confirm that the renewal date remains unchanged.
+3. Select **Mark as Paid** again and confirm. Verify that the next renewal date moves forward and the payment status changes to **Ready**.
+4. Verify the cycle rules: weekly adds 7 days, monthly adds 1 calendar month, yearly adds 1 calendar year, and custom adds the saved custom-cycle days.
+5. Select **Edit** on a subscription and confirm that the edit view also includes **Mark as Paid**.
+6. For month-end behavior, test a monthly renewal on January 31 and confirm that the next renewal is the final valid day of February.
+
+## Test quick payment status updates
+
+1. Add a subscription and open **Subscriptions**.
+2. On its card, choose **Need Top Up** from **Quick payment status**. Confirm that the payment badge and the small success message update immediately without opening the edit form.
+3. Reload the page and confirm that **Need Top Up** remains selected, proving that the change was stored locally in IndexedDB.
+4. Repeat the test with **Review First** and **Ready**.
+5. Open **Dashboard** and repeat the update on a visible renewal card. Confirm that the badge, Dashboard sections, and success message refresh immediately.
+6. Use a narrow mobile viewport and confirm that the selector remains easy to tap and fits within the card.
+
+## Test reminder days before renewal
+
+1. Add a new subscription and confirm that **Remind me before renewal** defaults to **7 days before**.
+2. Save subscriptions with renewal dates 1, 3, 7, 14, and 30 days from today, selecting the matching reminder window for each one.
+3. Open **Dashboard** and confirm that subscriptions inside their selected reminder windows appear in **Needs Attention**.
+4. Edit one subscription and reduce its reminder window so its renewal date is outside that window. Return to **Dashboard** and confirm that it is no longer shown in **Needs Attention**, unless it is overdue or still marked **Need Top Up**.
+5. Confirm that existing subscriptions created before this phase continue to work with a default 7-day reminder window.
+6. Export a JSON backup and confirm that each exported subscription includes `reminderDaysBefore`.
+
+## Test dashboard grouping
+
+The Dashboard displays each subscription once. Items that need attention take priority; the remaining future renewals flow into the first matching date group.
+
+1. Add an overdue subscription and confirm that it appears in **Needs Attention**.
+2. Add renewals for today and 1–3 days from today. Confirm that they appear in **Needs Attention**.
+3. Add subscriptions marked **Need Top Up** and **Review First**. Confirm that they appear in **Needs Attention**, even if their dates are more than 30 days away.
+4. Add a renewal 5 days from today with a 3-day reminder window. Confirm that it appears in **Next 7 Days**.
+5. Add a renewal 20 days from today with a 14-day reminder window. Confirm that it appears in **Next 30 Days**.
+6. Add a renewal 45 days from today with payment status **Ready**. Confirm that it appears in **Later**.
+7. Confirm that each subscription appears in only one Dashboard section. For example, a **Need Top Up** subscription due in 5 days appears only in **Needs Attention**, not again in **Next 7 Days**.
+8. Check a narrow mobile viewport and a desktop viewport to confirm that the section cards remain readable.
+
+## Test renewal history
+
+1. Add a subscription with a known price and renewal date.
+2. Open **Subscriptions**, select **Mark as Paid**, and confirm the prompt.
+3. Confirm that the subscription renewal date advances as usual.
+4. Select **Edit** on that subscription and find the **Renewal history** section.
+5. Confirm that the newest history item shows the paid timestamp, amount, currency, previous renewal date, and next renewal date.
+6. Mark the same subscription as paid again, reopen **Edit**, and confirm that a second history item appears above the first one.
+7. Select **Cancel** in a Mark as Paid confirmation prompt and confirm that no additional history item is created.
+8. Export a JSON backup and confirm that `renewalHistory` is included. Restore that backup and confirm that the edit view still shows the history items.
+
+## Test JSON backup and restore
+
+1. Add one or more subscriptions, choose **Backup**, and select **Export JSON**.
+2. Confirm that the downloaded file name includes today's date and that the JSON includes `subscriptions`, `exportedAt`, and `appVersion`.
+3. Confirm that the backup status updates from **Backup recommended** to **Backup is up to date** and shows the last backup date.
+4. Edit or delete a subscription, then choose **Backup** and select **Choose JSON file**. Select the exported JSON file.
+5. Confirm the replacement prompt and verify that the imported subscriptions replace the current local data.
+6. Try importing a plain text file, malformed JSON, or a JSON file without the expected structure. Confirm that a clear error appears and existing local subscriptions remain unchanged.
+7. To test the reminder again, clear the `renewalGuardLite.lastBackupAt` local-storage value in browser developer tools or set it to an ISO timestamp older than 14 days, then reopen **Backup**.
+
+## Test visual polish
+
+1. Open **Dashboard** and confirm that summary cards, renewal cards, and section empty states use consistent spacing, rounded borders, and a light shadow.
+2. Add subscriptions that produce each reminder state and confirm that the badges use a distinct border, soft background color, and small status dot without making the page feel noisy.
+3. Set subscriptions to **Ready**, **Need Top Up**, and **Review First** and confirm that the payment-status chips are easy to distinguish.
+4. Open **Subscriptions**, **Add New**, and **Backup** and confirm that primary, secondary, and quiet buttons have a consistent visual hierarchy.
+5. Check a narrow mobile viewport and confirm that the page padding, sticky header, bottom navigation, cards, and tap targets remain comfortable to use.
+6. Confirm that no new workflows, charts, analytics, or animations were added.
 
 ## Test offline readiness
 
