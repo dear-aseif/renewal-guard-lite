@@ -177,15 +177,21 @@ export function SubscriptionForm({ subscription, onSaved, onMarkedAsPaid, onCanc
   }
 
   return (
-    <form className="ui-card space-y-6 p-4 sm:p-7" onSubmit={handleSubmit}>
-      <div className="border-b border-slate-100 pb-5">
-        <h2 className="text-lg font-bold text-slate-900">{isEditing ? 'Edit subscription' : 'Subscription details'}</h2>
-        <p className="mt-1 text-sm leading-6 text-slate-500">Required fields are marked with an asterisk. Your data is saved locally on this device.</p>
+    <form className="relative space-y-6 overflow-hidden rounded-2xl border border-emerald-500/15 bg-neutral-950/75 p-4 shadow-card backdrop-blur-xl sm:p-6" onSubmit={handleSubmit}>
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-emerald-400/70 via-emerald-400/20 to-amber-400/40" />
+      <div className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-emerald-500/10 blur-3xl" />
+      <div className="relative border-b border-neutral-800/80 pb-5">
+        <div className="flex items-center gap-2">
+          <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.8)]" />
+          <p className="font-mono text-[10px] font-medium uppercase tracking-[0.18em] text-emerald-300">Local subscription record</p>
+        </div>
+        <h2 className="mt-3 text-xl font-light tracking-[-0.025em] text-slate-900">{isEditing ? 'Edit subscription' : 'Subscription details'}</h2>
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">Required fields are marked with an asterisk. Your data is saved locally on this device.</p>
       </div>
 
       {error && <p className="feedback-error" role="alert">{error}</p>}
 
-      <div className="grid gap-5 sm:grid-cols-2">
+      <div className="relative grid gap-x-4 gap-y-5 sm:grid-cols-2">
         <Field className="sm:col-span-2" label="Name" required>
           <input className={inputClassName} onChange={(event) => updateValue('name', event.target.value)} placeholder="e.g. ChatGPT Plus" required type="text" value={values.name} />
         </Field>
@@ -240,8 +246,9 @@ export function SubscriptionForm({ subscription, onSaved, onMarkedAsPaid, onCanc
       </div>
 
       {isEditing && (
-        <section className="border-t border-slate-100 pt-5">
-          <h3 className="text-base font-bold text-slate-900">Renewal history</h3>
+        <section className="relative rounded-xl border border-neutral-800/80 bg-neutral-900/40 p-4">
+          <p className="font-mono text-[10px] font-medium uppercase tracking-[0.16em] text-emerald-300">Payment timeline</p>
+          <h3 className="mt-2 text-base font-semibold tracking-tight text-slate-900">Renewal history</h3>
           <p className="mt-1 text-sm leading-6 text-slate-500">Manual payments recorded locally on this device.</p>
           {isHistoryLoading ? (
             <p className="mt-4 text-sm font-semibold text-slate-500">Loading renewal history...</p>
@@ -249,11 +256,11 @@ export function SubscriptionForm({ subscription, onSaved, onMarkedAsPaid, onCanc
             <div className="mt-4 space-y-3">
               {renewalHistory.map((history) => <RenewalHistoryItem history={history} key={history.id} />)}
             </div>
-          ) : <p className="mt-4 rounded-2xl bg-slate-50 px-4 py-3 text-sm text-slate-500">No renewal history yet. Mark this subscription as paid to add the first record.</p>}
+          ) : <p className="mt-4 rounded-lg border border-neutral-800 bg-neutral-950/50 px-4 py-3 text-sm leading-6 text-slate-500">No renewal history yet. Mark this subscription as paid to add the first record.</p>}
         </section>
       )}
 
-      <div className="flex flex-col-reverse gap-3 border-t border-slate-100 pt-5 sm:flex-row sm:flex-wrap sm:justify-end">
+      <div className="relative flex flex-col-reverse gap-3 border-t border-neutral-800/80 pt-5 sm:flex-row sm:flex-wrap sm:justify-end">
         {isEditing && <button className="btn-ghost min-h-11 px-4" onClick={onCancelEdit} type="button">Cancel edit</button>}
         {isEditing && <button className="btn-secondary" disabled={isSaving} onClick={() => void markAsPaid()} type="button">Mark as Paid</button>}
         <button className="btn-primary px-5" disabled={isSaving} type="submit">
@@ -264,12 +271,12 @@ export function SubscriptionForm({ subscription, onSaved, onMarkedAsPaid, onCanc
   )
 }
 
-const inputClassName = 'field-control mt-2'
+const inputClassName = 'field-control mt-2 hover:border-neutral-600 hover:bg-neutral-900 focus:bg-neutral-900'
 
 function Field({ children, className = '', label, required = false }: { children: ReactNode; className?: string; label: string; required?: boolean }) {
   return (
-    <label className={`block text-sm font-bold text-slate-700 ${className}`}>
-      {label}{required && <span className="ml-1 text-teal-700">*</span>}
+    <label className={`group block font-mono text-[10px] font-medium uppercase tracking-[0.12em] text-slate-500 ${className}`}>
+      {label}{required && <span className="ml-1 text-emerald-300">*</span>}
       {children}
     </label>
   )
@@ -278,7 +285,7 @@ function Field({ children, className = '', label, required = false }: { children
 
 function RenewalHistoryItem({ history }: { history: RenewalHistory }) {
   return (
-    <article className="rounded-2xl border border-slate-200/80 bg-slate-50/70 px-4 py-3">
+    <article className="rounded-lg border border-neutral-800 bg-neutral-950/60 px-4 py-3 transition duration-200 hover:border-emerald-500/20">
       <div className="flex flex-col gap-1 min-[420px]:flex-row min-[420px]:items-center min-[420px]:justify-between">
         <p className="text-sm font-bold text-slate-800">{history.currency} {history.amount.toLocaleString()}</p>
         <p className="text-xs font-semibold text-slate-500">Paid {formatDateTime(history.paidDate)}</p>
