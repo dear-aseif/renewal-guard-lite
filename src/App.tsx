@@ -140,9 +140,9 @@ export default function App() {
           {activePage === 'add' ? (
             <div className="space-y-5">
               {savedSubscription && (
-                <div className="flex flex-col gap-3 rounded-2xl border border-teal-100 bg-teal-50 px-4 py-3 text-sm text-teal-800 sm:flex-row sm:items-center sm:justify-between" role="status">
+                <div className="flex flex-col gap-3 rounded-xl border border-emerald-500/25 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200 shadow-card backdrop-blur-xl sm:flex-row sm:items-center sm:justify-between" role="status">
                   <p><span className="font-bold">{savedMessage}</span> {savedSubscription.name} is stored on this device.</p>
-                  {!editingSubscription && <button className="text-left font-bold text-teal-700 underline decoration-teal-300 underline-offset-4" onClick={() => startEditing(savedSubscription)} type="button">Edit saved subscription</button>}
+                  {!editingSubscription && <button className="text-left font-semibold text-emerald-300 underline decoration-emerald-500/50 underline-offset-4 transition duration-200 hover:text-emerald-200" onClick={() => startEditing(savedSubscription)} type="button">Edit saved subscription</button>}
                 </div>
               )}
               <SubscriptionForm onCancelEdit={() => setEditingSubscription(undefined)} onMarkedAsPaid={handleMarkedAsPaid} onSaved={handleSaved} subscription={editingSubscription} />

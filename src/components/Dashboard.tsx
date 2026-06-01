@@ -79,12 +79,12 @@ export function Dashboard({ onAdd }: DashboardProps) {
     }
   }
 
-  if (isLoading) return <EmptyState description="Reading your locally saved subscriptions." icon="storage" title="Loading your renewal summary..." />
+  if (isLoading) return <EmptyState description="Reading subscription data stored on this device." icon="storage" title="Preparing your renewal summary..." />
 
   if (error) return <p className="feedback-error" role="alert">{error}</p>
 
   if (subscriptions.length === 0) {
-    return <EmptyState action={<button className="btn-primary mt-5" onClick={onAdd} type="button">Add your first subscription</button>} description="Add your first subscription to see your renewal summary." icon="subscriptions" title="No subscriptions yet" />
+    return <EmptyState action={<button className="btn-primary mt-5" onClick={onAdd} type="button">Add your first subscription</button>} description="Add a subscription to start tracking upcoming payments and renewal reminders." icon="subscriptions" title="No subscriptions yet" />
   }
 
   const renderRenewalCard = (subscription: Subscription) => <RenewalCard isUpdatingPaymentStatus={updatingPaymentStatusId === subscription.id} key={subscription.id} onMarkAsPaid={() => void markAsPaid(subscription)} onPaymentStatusChange={(paymentStatus) => void updatePaymentStatus(subscription, paymentStatus)} subscription={subscription} />
@@ -108,19 +108,19 @@ export function Dashboard({ onAdd }: DashboardProps) {
       </section>
 
       <DashboardSection description="Overdue, due today, urgent, inside your reminder window, or waiting for a payment review." title="Needs Attention">
-        <RenewalCardGrid emptyDescription="Overdue renewals and payment reminders will appear here." emptyTitle="No items need attention" renderSubscription={renderRenewalCard} subscriptions={dashboard.needsAttention} />
+        <RenewalCardGrid emptyDescription="You are all caught up. Overdue renewals and payment checks will appear here when needed." emptyTitle="No items need attention" renderSubscription={renderRenewalCard} subscriptions={dashboard.needsAttention} />
       </DashboardSection>
 
       <DashboardSection description="Renewals due within 7 days that do not already need attention." title="Next 7 Days">
-        <RenewalCardGrid emptyDescription="Renewals due in the next 7 days will appear here." emptyTitle="No renewals in the next 7 days" renderSubscription={renderRenewalCard} subscriptions={dashboard.nextSevenDaysGroup} />
+        <RenewalCardGrid emptyDescription="Nothing is scheduled in this window. Renewals due within 7 days will appear here." emptyTitle="No renewals in the next 7 days" renderSubscription={renderRenewalCard} subscriptions={dashboard.nextSevenDaysGroup} />
       </DashboardSection>
 
       <DashboardSection description="Renewals due in 8–30 days that do not already appear above." title="Next 30 Days">
-        <RenewalCardGrid emptyDescription="Renewals due in the next 30 days will appear here." emptyTitle="No renewals in the next 30 days" renderSubscription={renderRenewalCard} subscriptions={dashboard.nextThirtyDaysGroup} />
+        <RenewalCardGrid emptyDescription="Nothing is scheduled in this window. Renewals due within 30 days will appear here." emptyTitle="No renewals in the next 30 days" renderSubscription={renderRenewalCard} subscriptions={dashboard.nextThirtyDaysGroup} />
       </DashboardSection>
 
       <DashboardSection description="Renewals more than 30 days away that do not already need attention." title="Later">
-        <RenewalCardGrid emptyDescription="Renewals more than 30 days away will appear here." emptyTitle="No later renewals" renderSubscription={renderRenewalCard} subscriptions={dashboard.later} />
+        <RenewalCardGrid emptyDescription="Longer-term renewals will appear here once they are more than 30 days away." emptyTitle="No later renewals" renderSubscription={renderRenewalCard} subscriptions={dashboard.later} />
       </DashboardSection>
     </div>
   )
@@ -178,7 +178,7 @@ function RenewalCard({ isUpdatingPaymentStatus, onMarkAsPaid, onPaymentStatusCha
   const borderClass = getSubscriptionBorderClass(subscription)
 
   return (
-    <article className={`ui-card ui-card-interactive rounded-2xl p-4 ${borderClass}`}>
+    <article className={`ui-card ui-card-interactive rounded-xl p-4 ${borderClass}`}>
       <div className="flex flex-col gap-3 min-[380px]:flex-row min-[380px]:items-start min-[380px]:justify-between">
         <div className="min-w-0">
           <h3 className="truncate font-bold text-slate-900">{subscription.name}</h3>
@@ -186,13 +186,13 @@ function RenewalCard({ isUpdatingPaymentStatus, onMarkAsPaid, onPaymentStatusCha
         </div>
         <ReminderBadge nextRenewalDate={subscription.nextRenewalDate} />
       </div>
-      <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 pt-3 text-sm">
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-neutral-800/80 pt-3 text-sm">
         <p className="font-bold text-teal-700">{subscription.currency} {subscription.price.toLocaleString()}</p>
         <PaymentStatusBadge paymentStatus={subscription.paymentStatus} />
       </div>
-      <label className="mt-3 block text-xs font-bold text-slate-600">
-        Quick payment status
-        <select aria-label={`Quick payment status for ${subscription.name}`} className="field-control mt-1.5 py-2.5 font-semibold text-slate-700" disabled={isUpdatingPaymentStatus} onChange={(event) => onPaymentStatusChange(event.target.value as Subscription['paymentStatus'])} value={subscription.paymentStatus}>
+      <label className="mt-3 block font-mono text-[10px] font-medium uppercase tracking-[0.12em] text-slate-500">
+        Payment readiness
+        <select aria-label={`Payment readiness for ${subscription.name}`} className="field-control mt-1.5 py-2.5 font-semibold text-slate-700" disabled={isUpdatingPaymentStatus} onChange={(event) => onPaymentStatusChange(event.target.value as Subscription['paymentStatus'])} value={subscription.paymentStatus}>
           {paymentStatusOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
         </select>
       </label>

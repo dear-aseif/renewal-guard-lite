@@ -95,7 +95,7 @@ export function SubscriptionList({ onAdd, onEdit }: SubscriptionListProps) {
   }
 
   if (isLoading) {
-    return <EmptyState description="Reading subscriptions stored on this device." icon="storage" title="Loading your subscriptions..." />
+    return <EmptyState description="Reading subscription data stored on this device." icon="storage" title="Loading your subscriptions..." />
   }
 
   return (
@@ -130,7 +130,7 @@ export function SubscriptionList({ onAdd, onEdit }: SubscriptionListProps) {
       ) : (
         <EmptyState
           action={subscriptions.length === 0 ? <button className="btn-primary mt-5" onClick={onAdd} type="button">Add your first subscription</button> : undefined}
-          description={subscriptions.length === 0 ? 'Add your first subscription to start tracking renewals.' : 'Try a different subscription name.'}
+          description={subscriptions.length === 0 ? 'Add your first subscription to start tracking renewal dates and payment readiness.' : 'Try another name or clear the search field.'}
           icon="subscriptions"
           title={subscriptions.length === 0 ? 'No subscriptions yet' : 'No matching subscriptions'}
         />
@@ -164,8 +164,8 @@ function SubscriptionCard({ isUpdatingPaymentStatus, onDelete, onEdit, onMarkAsP
       </dl>
 
       <label className="mt-4 block text-sm font-bold text-slate-700">
-        Quick payment status
-        <select aria-label={`Quick payment status for ${subscription.name}`} className="field-control mt-2 font-semibold text-slate-700" disabled={isUpdatingPaymentStatus} onChange={(event) => onPaymentStatusChange(event.target.value as Subscription['paymentStatus'])} value={subscription.paymentStatus}>
+        Payment readiness
+        <select aria-label={`Payment readiness for ${subscription.name}`} className="field-control mt-2 font-semibold text-slate-700" disabled={isUpdatingPaymentStatus} onChange={(event) => onPaymentStatusChange(event.target.value as Subscription['paymentStatus'])} value={subscription.paymentStatus}>
           {paymentStatusOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
         </select>
       </label>

@@ -10,18 +10,18 @@ type StatusStyle = {
 }
 
 export const paymentStatusStyles: Record<Subscription['paymentStatus'], StatusStyle> = {
-  ready: { badgeClass: 'border-emerald-200 bg-emerald-50 text-emerald-700', borderClass: 'border-slate-200', dotClass: 'bg-emerald-500', label: 'Ready' },
-  need_top_up: { badgeClass: 'border-amber-300 bg-amber-50 text-amber-800', borderClass: 'border-amber-300', dotClass: 'bg-amber-500', label: 'Need Top Up' },
-  review_first: { badgeClass: 'border-violet-200 bg-violet-50 text-violet-700', borderClass: 'border-violet-200', dotClass: 'bg-violet-500', label: 'Review First' },
+  ready: { badgeClass: 'border-emerald-500/25 bg-emerald-500/10 text-emerald-300', borderClass: 'border-neutral-800', dotClass: 'bg-emerald-400', label: 'Ready' },
+  need_top_up: { badgeClass: 'border-amber-500/35 bg-amber-500/10 text-amber-300', borderClass: 'border-amber-500/40', dotClass: 'bg-amber-400', label: 'Need Top Up' },
+  review_first: { badgeClass: 'border-violet-500/30 bg-violet-500/10 text-violet-300', borderClass: 'border-violet-500/35', dotClass: 'bg-violet-400', label: 'Review First' },
 }
 
 export const reminderStatusStyles: Record<ReminderStatus, StatusStyle> = {
-  overdue: { badgeClass: 'border-red-200 bg-red-50 text-red-700', borderClass: 'border-red-300', dotClass: 'bg-red-500', label: 'Overdue' },
-  today: { badgeClass: 'border-rose-200 bg-rose-50 text-rose-700', borderClass: 'border-rose-300', dotClass: 'bg-rose-500', label: 'Today' },
-  urgent: { badgeClass: 'border-orange-200 bg-orange-50 text-orange-700', borderClass: 'border-orange-300', dotClass: 'bg-orange-500', label: 'Urgent' },
-  soon: { badgeClass: 'border-amber-200 bg-amber-50 text-amber-700', borderClass: 'border-amber-200', dotClass: 'bg-amber-400', label: 'Soon' },
-  upcoming: { badgeClass: 'border-teal-200 bg-teal-50 text-teal-700', borderClass: 'border-teal-200', dotClass: 'bg-teal-500', label: 'Upcoming' },
-  safe: { badgeClass: 'border-slate-200 bg-slate-50 text-slate-600', borderClass: 'border-slate-200', dotClass: 'bg-slate-400', label: 'Safe' },
+  overdue: { badgeClass: 'border-red-500/40 bg-red-500/10 text-red-300', borderClass: 'border-red-500/45', dotClass: 'bg-red-400', label: 'Overdue' },
+  today: { badgeClass: 'border-rose-500/40 bg-rose-500/10 text-rose-300', borderClass: 'border-rose-500/45', dotClass: 'bg-rose-400', label: 'Today' },
+  urgent: { badgeClass: 'border-orange-500/40 bg-orange-500/10 text-orange-300', borderClass: 'border-orange-500/40', dotClass: 'bg-orange-400', label: 'Urgent' },
+  soon: { badgeClass: 'border-amber-500/25 bg-amber-500/10 text-amber-300', borderClass: 'border-amber-500/25', dotClass: 'bg-amber-400', label: 'Soon' },
+  upcoming: { badgeClass: 'border-emerald-500/25 bg-emerald-500/10 text-emerald-300', borderClass: 'border-emerald-500/20', dotClass: 'bg-emerald-400', label: 'Upcoming' },
+  safe: { badgeClass: 'border-neutral-700 bg-neutral-900/70 text-slate-500', borderClass: 'border-neutral-800', dotClass: 'bg-slate-400', label: 'Safe' },
 }
 
 export function getReminderStatus(nextRenewalDate: string): ReminderStatus {
