@@ -38,6 +38,7 @@
 
   button {
     cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
   }
 
   button:focus-visible,
@@ -55,30 +56,42 @@
   }
 
   .ui-card-interactive {
-    @apply transition duration-200 hover:border-emerald-400/30 hover:shadow-card-hover;
+    @apply transition duration-200 ease-out motion-safe:hover:-translate-y-0.5 hover:border-emerald-400/30 hover:shadow-card-hover;
   }
 
   .btn-primary {
-    @apply inline-flex min-h-11 items-center justify-center rounded-lg bg-emerald-500 px-4 py-2.5 text-sm font-semibold text-neutral-950 shadow-button transition duration-200 hover:bg-emerald-400 hover:shadow-button-hover disabled:cursor-not-allowed disabled:opacity-60;
+    @apply inline-flex min-h-11 items-center justify-center rounded-lg bg-emerald-500 px-4 py-2.5 text-[15px] leading-5 font-semibold sm:text-sm text-neutral-950 shadow-button transition duration-200 ease-out motion-safe:hover:-translate-y-0.5 hover:bg-emerald-400 hover:shadow-button-hover motion-safe:active:translate-y-px active:shadow-none disabled:cursor-not-allowed disabled:opacity-60 motion-safe:disabled:hover:translate-y-0;
   }
 
   .btn-secondary {
-    @apply inline-flex min-h-11 items-center justify-center rounded-lg border border-emerald-500/30 bg-neutral-900/80 px-4 py-2.5 text-sm font-semibold text-emerald-300 transition duration-200 hover:border-emerald-400/60 hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-60;
+    @apply inline-flex min-h-11 items-center justify-center rounded-lg border border-emerald-500/30 bg-neutral-900/80 px-4 py-2.5 text-[15px] leading-5 font-semibold sm:text-sm text-emerald-300 transition duration-200 ease-out motion-safe:hover:-translate-y-0.5 hover:border-emerald-400/60 hover:bg-neutral-800 motion-safe:active:translate-y-px active:border-emerald-400 active:bg-neutral-900 disabled:cursor-not-allowed disabled:opacity-60 motion-safe:disabled:hover:translate-y-0;
   }
 
   .btn-ghost {
-    @apply inline-flex min-h-10 items-center justify-center rounded-lg px-3 py-2 text-sm font-semibold text-slate-600 transition duration-200 hover:bg-neutral-800 hover:text-slate-800;
+    @apply inline-flex min-h-10 items-center justify-center rounded-lg px-3 py-2 text-[15px] leading-5 font-semibold sm:text-sm text-slate-600 transition duration-200 ease-out hover:bg-neutral-800 hover:text-slate-800 motion-safe:active:scale-[0.98] active:bg-neutral-900;
   }
 
   .field-control {
-    @apply w-full rounded-lg border border-neutral-700 bg-neutral-900/80 px-3.5 py-3 text-sm text-slate-800 outline-none transition duration-200 placeholder:text-slate-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 disabled:cursor-wait disabled:bg-neutral-900;
+    @apply w-full rounded-lg border border-neutral-700 bg-neutral-900/80 px-3.5 py-3 text-base leading-6 text-slate-800 sm:text-sm outline-none transition duration-200 ease-out placeholder:text-slate-400 hover:border-neutral-600 hover:bg-neutral-900 focus:border-emerald-500 focus:bg-neutral-900 focus:ring-4 focus:ring-emerald-500/10 disabled:cursor-wait disabled:bg-neutral-900;
   }
 
   .feedback-success {
-    @apply rounded-xl border border-emerald-500/25 bg-emerald-500/10 px-4 py-3 text-sm font-medium leading-6 text-emerald-200 shadow-card backdrop-blur-xl;
+    @apply rounded-xl border border-emerald-500/25 bg-emerald-500/10 px-4 py-3 text-[15px] font-medium leading-6 sm:text-sm text-emerald-200 shadow-card backdrop-blur-xl;
   }
 
   .feedback-error {
-    @apply rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm font-medium leading-6 text-red-200 shadow-card backdrop-blur-xl;
+    @apply rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-[15px] font-medium leading-6 sm:text-sm text-red-200 shadow-card backdrop-blur-xl;
+  }
+}
+
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }

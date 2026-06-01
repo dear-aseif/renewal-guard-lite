@@ -1,4 +1,4 @@
-const CACHE_NAME = 'renewal-guard-lite-v10'
+const CACHE_NAME = 'renewal-guard-lite-v12'
 const APP_SHELL = ['/', '/manifest.webmanifest', '/renewal-guard-icon.svg']
 
 self.addEventListener('install', (event) => {
