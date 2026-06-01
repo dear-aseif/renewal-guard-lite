@@ -113,16 +113,16 @@ export function SubscriptionList({ onAdd, onEdit }: SubscriptionListProps) {
 
       {message && <p className={message.type === 'success' ? 'feedback-success' : 'feedback-error'} role={message.type === 'error' ? 'alert' : 'status'}>{message.text}</p>}
 
-      <div className="flex items-center justify-between gap-3">
+      <div className="flex flex-col items-stretch gap-3 min-[420px]:flex-row min-[420px]:items-center min-[420px]:justify-between">
         <div>
           <h2 className="text-lg font-bold text-slate-900">Saved subscriptions</h2>
           <p className="mt-1 text-sm text-slate-500">Sorted by nearest renewal date.</p>
         </div>
-        <button className="btn-primary shrink-0" onClick={onAdd} type="button">Add new</button>
+        <button className="btn-primary w-full shrink-0 min-[420px]:w-auto" onClick={onAdd} type="button">Add new</button>
       </div>
 
       {visibleSubscriptions.length > 0 ? (
-        <div className="grid gap-4 lg:grid-cols-2">
+        <div className="grid gap-3 sm:gap-4 lg:grid-cols-2">
           {visibleSubscriptions.map((subscription) => (
             <SubscriptionCard isUpdatingPaymentStatus={updatingPaymentStatusId === subscription.id} key={subscription.id} onDelete={() => void deleteSubscription(subscription)} onEdit={() => onEdit(subscription)} onMarkAsPaid={() => void markAsPaid(subscription)} onPaymentStatusChange={(paymentStatus) => void updatePaymentStatus(subscription, paymentStatus)} subscription={subscription} />
           ))}
@@ -170,10 +170,10 @@ function SubscriptionCard({ isUpdatingPaymentStatus, onDelete, onEdit, onMarkAsP
         </select>
       </label>
 
-      <div className="mt-4 flex flex-wrap justify-end gap-2">
-        <button className="btn-primary mr-auto min-h-10 px-3 py-2" onClick={onMarkAsPaid} type="button">Mark as Paid</button>
-        <button className="btn-ghost text-teal-700 hover:bg-teal-50 hover:text-teal-800" onClick={onEdit} type="button">Edit</button>
-        <button className="btn-ghost text-red-600 hover:bg-red-50 hover:text-red-700" onClick={onDelete} type="button">Delete</button>
+      <div className="mt-4 grid grid-cols-2 gap-2 min-[420px]:flex min-[420px]:flex-wrap min-[420px]:justify-end">
+        <button className="btn-primary col-span-2 w-full px-3 py-2 min-[420px]:mr-auto min-[420px]:w-auto" onClick={onMarkAsPaid} type="button">Mark as Paid</button>
+        <button className="btn-ghost w-full text-teal-700 hover:bg-teal-50 hover:text-teal-800 min-[420px]:w-auto" onClick={onEdit} type="button">Edit</button>
+        <button className="btn-ghost w-full text-red-600 hover:bg-red-50 hover:text-red-700 min-[420px]:w-auto" onClick={onDelete} type="button">Delete</button>
       </div>
     </article>
   )
@@ -181,9 +181,9 @@ function SubscriptionCard({ isUpdatingPaymentStatus, onDelete, onEdit, onMarkAsP
 
 function Detail({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex items-start justify-between gap-4">
+    <div className="flex flex-col gap-1 min-[420px]:flex-row min-[420px]:items-start min-[420px]:justify-between min-[420px]:gap-4">
       <dt className="text-slate-500">{label}</dt>
-      <dd className="break-all text-right font-semibold text-slate-700">{value}</dd>
+      <dd className="min-w-0 break-all text-left font-semibold text-slate-700 min-[420px]:text-right">{value}</dd>
     </div>
   )
 }

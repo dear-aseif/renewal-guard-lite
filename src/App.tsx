@@ -51,7 +51,7 @@ function NavigationButton({ item, activePage, onSelect, mobile = false }: { item
     <button
       aria-current={isActive ? 'page' : undefined}
       className={mobile
-        ? `flex min-w-0 flex-1 flex-col items-center gap-1 rounded-lg px-1 py-2.5 text-[11px] font-bold transition duration-200 ${isActive ? 'bg-emerald-500/10 text-emerald-300' : 'text-slate-500 hover:bg-neutral-900 hover:text-emerald-300'}`
+        ? `flex min-h-14 min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-lg px-1 py-2 text-[11px] font-bold transition duration-200 ${isActive ? 'bg-emerald-500/10 text-emerald-300' : 'text-slate-500 hover:bg-neutral-900 hover:text-emerald-300'}`
         : `flex w-full items-center gap-3 rounded-lg px-3 py-3 text-sm font-semibold transition duration-200 ${isActive ? 'bg-emerald-500/10 text-emerald-300' : 'text-slate-500 hover:bg-neutral-900 hover:text-emerald-300'}`}
       onClick={() => onSelect(item.id)}
       type="button"
@@ -98,8 +98,8 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-canvas bg-[radial-gradient(circle_at_top_right,_rgba(16,185,129,0.13),_transparent_30rem)] pb-24 md:pb-0">
-      <aside className="fixed inset-y-0 left-0 hidden w-64 border-r border-neutral-800 bg-neutral-950/85 px-5 py-6 backdrop-blur-xl md:block">
+    <div className="min-h-screen bg-canvas bg-[radial-gradient(circle_at_top_right,_rgba(16,185,129,0.13),_transparent_30rem)] pb-24 lg:pb-0">
+      <aside className="fixed inset-y-0 left-0 hidden w-64 border-r border-neutral-800 bg-neutral-950/85 px-5 py-6 backdrop-blur-xl lg:block">
         <Brand />
         <nav aria-label="Primary navigation" className="mt-10 space-y-2">
           {navigationItems.map((item) => <NavigationButton activePage={activePage} item={item} key={item.id} onSelect={navigateTo} />)}
@@ -111,11 +111,11 @@ export default function App() {
         </div>
       </aside>
 
-      <main className="md:ml-64">
-        <header className="sticky top-0 z-10 border-b border-neutral-800 bg-neutral-950/85 px-4 py-3.5 backdrop-blur-xl md:hidden">
+      <main className="lg:ml-64">
+        <header className="sticky top-0 z-10 border-b border-neutral-800 bg-neutral-950/85 px-4 py-3.5 backdrop-blur-xl lg:hidden">
           <Brand />
         </header>
-        <div className="mx-auto max-w-5xl px-4 py-6 sm:px-8 md:py-12 lg:px-12">
+        <div className="mx-auto max-w-5xl px-3 py-5 sm:px-6 sm:py-7 md:px-8 md:py-8 lg:px-12 lg:py-12">
           <section className="relative mb-6 overflow-hidden rounded-2xl bg-[linear-gradient(to_right_bottom,rgba(16,185,129,0.28),rgba(38,38,38,0.24),rgba(245,158,11,0.18))] p-px shadow-card sm:mb-8" aria-labelledby="page-title">
             <div className="relative overflow-hidden rounded-[15px] border border-neutral-800/80 bg-neutral-950/85 px-4 py-5 backdrop-blur-xl sm:px-6 sm:py-6">
               <div className="pointer-events-none absolute inset-0 opacity-40 [background-image:linear-gradient(rgba(16,185,129,0.08)_1px,transparent_1px),linear-gradient(90deg,rgba(16,185,129,0.08)_1px,transparent_1px)] [background-size:24px_24px]" />
@@ -155,7 +155,7 @@ export default function App() {
         </div>
       </main>
 
-      <nav aria-label="Mobile navigation" className="fixed inset-x-0 bottom-0 z-20 flex border-t border-neutral-800 bg-neutral-950/90 px-2 pb-[max(0.35rem,env(safe-area-inset-bottom))] pt-1.5 shadow-[0_-10px_30px_-24px_rgba(0,0,0,0.8)] backdrop-blur-xl md:hidden">
+      <nav aria-label="Mobile navigation" className="fixed inset-x-0 bottom-0 z-20 flex border-t border-neutral-800 bg-neutral-950/90 px-2 pb-[max(0.35rem,env(safe-area-inset-bottom))] pt-1.5 shadow-[0_-10px_30px_-24px_rgba(0,0,0,0.8)] backdrop-blur-xl lg:hidden">
         {navigationItems.map((item) => <NavigationButton activePage={activePage} item={item} key={item.id} mobile onSelect={navigateTo} />)}
       </nav>
     </div>

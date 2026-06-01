@@ -90,7 +90,7 @@ export function Dashboard({ onAdd }: DashboardProps) {
   const renderRenewalCard = (subscription: Subscription) => <RenewalCard isUpdatingPaymentStatus={updatingPaymentStatusId === subscription.id} key={subscription.id} onMarkAsPaid={() => void markAsPaid(subscription)} onPaymentStatusChange={(paymentStatus) => void updatePaymentStatus(subscription, paymentStatus)} subscription={subscription} />
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8">
       {success && <p className="feedback-success" role="status">{success}</p>}
       <section aria-labelledby="renewal-summary-title">
         <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
@@ -100,7 +100,7 @@ export function Dashboard({ onAdd }: DashboardProps) {
           </div>
           <p className="max-w-md text-sm leading-6 text-slate-500 sm:text-right">Totals stay separated by currency. No conversions are applied.</p>
         </div>
-        <div className="grid gap-3 sm:grid-cols-3">
+        <div className="grid gap-3 sm:grid-cols-3 md:gap-4">
           <SummaryCard code="MTH" label="This month" totals={dashboard.thisMonth} />
           <SummaryCard code="7D" label="Next 7 days" totals={dashboard.nextSevenDays} />
           <SummaryCard code="30D" label="Next 30 days" totals={dashboard.nextThirtyDays} />
@@ -129,7 +129,7 @@ export function Dashboard({ onAdd }: DashboardProps) {
 function RenewalCardGrid({ emptyDescription, emptyTitle, renderSubscription, subscriptions }: { emptyDescription: string; emptyTitle: string; renderSubscription: (subscription: Subscription) => ReactNode; subscriptions: Subscription[] }) {
   if (subscriptions.length === 0) return <EmptyState description={emptyDescription} icon="calendar" title={emptyTitle} />
 
-  return <div className="grid gap-3 lg:grid-cols-2">{subscriptions.map(renderSubscription)}</div>
+  return <div className="grid gap-3 sm:gap-4 lg:grid-cols-2">{subscriptions.map(renderSubscription)}</div>
 }
 
 function SummaryCard({ code, label, totals }: { code: string; label: string; totals: CurrencyTotals }) {

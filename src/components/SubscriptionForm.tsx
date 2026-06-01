@@ -177,7 +177,7 @@ export function SubscriptionForm({ subscription, onSaved, onMarkedAsPaid, onCanc
   }
 
   return (
-    <form className="relative space-y-6 overflow-hidden rounded-2xl border border-emerald-500/15 bg-neutral-950/75 p-4 shadow-card backdrop-blur-xl sm:p-6" onSubmit={handleSubmit}>
+    <form className="relative space-y-5 overflow-hidden rounded-2xl border border-emerald-500/15 bg-neutral-950/75 p-3 shadow-card backdrop-blur-xl sm:space-y-6 sm:p-5 md:p-6" onSubmit={handleSubmit}>
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-emerald-400/70 via-emerald-400/20 to-amber-400/40" />
       <div className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-emerald-500/10 blur-3xl" />
       <div className="relative border-b border-neutral-800/80 pb-5">
@@ -191,7 +191,7 @@ export function SubscriptionForm({ subscription, onSaved, onMarkedAsPaid, onCanc
 
       {error && <p className="feedback-error" role="alert">{error}</p>}
 
-      <div className="relative grid gap-x-4 gap-y-5 sm:grid-cols-2">
+      <div className="relative grid min-w-0 gap-x-4 gap-y-5 sm:grid-cols-2">
         <Field className="sm:col-span-2" label="Name" required>
           <input className={inputClassName} onChange={(event) => updateValue('name', event.target.value)} placeholder="e.g. ChatGPT Plus" required type="text" value={values.name} />
         </Field>
@@ -261,9 +261,9 @@ export function SubscriptionForm({ subscription, onSaved, onMarkedAsPaid, onCanc
       )}
 
       <div className="relative flex flex-col-reverse gap-3 border-t border-neutral-800/80 pt-5 sm:flex-row sm:flex-wrap sm:justify-end">
-        {isEditing && <button className="btn-ghost min-h-11 px-4" onClick={onCancelEdit} type="button">Cancel edit</button>}
-        {isEditing && <button className="btn-secondary" disabled={isSaving} onClick={() => void markAsPaid()} type="button">Mark as Paid</button>}
-        <button className="btn-primary px-5" disabled={isSaving} type="submit">
+        {isEditing && <button className="btn-ghost min-h-11 w-full px-4 sm:w-auto" onClick={onCancelEdit} type="button">Cancel edit</button>}
+        {isEditing && <button className="btn-secondary w-full sm:w-auto" disabled={isSaving} onClick={() => void markAsPaid()} type="button">Mark as Paid</button>}
+        <button className="btn-primary w-full px-5 sm:w-auto" disabled={isSaving} type="submit">
           {isSaving ? 'Saving...' : isEditing ? 'Save changes' : 'Save subscription'}
         </button>
       </div>
@@ -271,11 +271,11 @@ export function SubscriptionForm({ subscription, onSaved, onMarkedAsPaid, onCanc
   )
 }
 
-const inputClassName = 'field-control mt-2 hover:border-neutral-600 hover:bg-neutral-900 focus:bg-neutral-900'
+const inputClassName = 'field-control mt-2 min-w-0 hover:border-neutral-600 hover:bg-neutral-900 focus:bg-neutral-900'
 
 function Field({ children, className = '', label, required = false }: { children: ReactNode; className?: string; label: string; required?: boolean }) {
   return (
-    <label className={`group block font-mono text-[10px] font-medium uppercase tracking-[0.12em] text-slate-500 ${className}`}>
+    <label className={`group block min-w-0 font-mono text-[10px] font-medium uppercase tracking-[0.12em] text-slate-500 ${className}`}>
       {label}{required && <span className="ml-1 text-emerald-300">*</span>}
       {children}
     </label>

@@ -75,7 +75,7 @@ export function BackupRestore() {
 
       {message && <p className={message.type === 'success' ? 'feedback-success' : 'feedback-error'} role={message.type === 'error' ? 'alert' : 'status'}>{message.text}</p>}
 
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-3 sm:gap-4 md:grid-cols-2">
         <BackupCard description="Download your subscriptions and renewal history as a JSON file. Nothing leaves this device." title="Export JSON backup">
           <button className="btn-primary mt-5 w-full" disabled={isWorking} onClick={() => void exportBackup()} type="button">Export JSON</button>
         </BackupCard>
@@ -93,7 +93,7 @@ export function BackupRestore() {
 
 function BackupCard({ children, description, title }: { children: ReactNode; description: string; title: string }) {
   return (
-    <article className="ui-card ui-card-interactive p-5 sm:p-6">
+    <article className="ui-card ui-card-interactive p-4 sm:p-5 md:p-6">
       <h2 className="text-lg font-bold text-slate-900">{title}</h2>
       <p className="mt-2 text-sm leading-6 text-slate-500">{description}</p>
       {children}

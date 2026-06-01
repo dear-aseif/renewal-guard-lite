@@ -20,6 +20,7 @@
     min-width: 320px;
     min-height: 100vh;
     margin: 0;
+    overflow-x: hidden;
     background:
       radial-gradient(circle at top right, rgba(16, 185, 129, 0.13), transparent 30rem),
       radial-gradient(circle at bottom left, rgba(245, 158, 11, 0.05), transparent 24rem),
