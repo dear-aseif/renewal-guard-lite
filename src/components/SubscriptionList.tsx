@@ -101,7 +101,7 @@ export function SubscriptionList({ onAdd, onEdit }: SubscriptionListProps) {
   return (
     <section className="space-y-5">
       <div className="ui-card p-4 sm:p-5">
-        <label className="block text-sm font-bold text-slate-700" htmlFor="subscription-search">Search subscriptions</label>
+        <label className="block text-[15px] leading-6 font-bold text-slate-700 sm:text-sm" htmlFor="subscription-search">Search subscriptions</label>
         <div className="relative mt-2">
           <svg aria-hidden="true" className="pointer-events-none absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="2" viewBox="0 0 24 24">
             <circle cx="11" cy="11" r="6" />
@@ -116,7 +116,7 @@ export function SubscriptionList({ onAdd, onEdit }: SubscriptionListProps) {
       <div className="flex flex-col items-stretch gap-3 min-[420px]:flex-row min-[420px]:items-center min-[420px]:justify-between">
         <div>
           <h2 className="text-lg font-bold text-slate-900">Saved subscriptions</h2>
-          <p className="mt-1 text-sm text-slate-500">Sorted by nearest renewal date.</p>
+          <p className="mt-1 text-[15px] leading-6 text-slate-500 sm:text-sm">Sorted by nearest renewal date.</p>
         </div>
         <button className="btn-primary w-full shrink-0 min-[420px]:w-auto" onClick={onAdd} type="button">Add new</button>
       </div>
@@ -147,7 +147,7 @@ function SubscriptionCard({ isUpdatingPaymentStatus, onDelete, onEdit, onMarkAsP
       <div className="flex flex-col gap-3 min-[420px]:flex-row min-[420px]:items-start min-[420px]:justify-between">
         <div className="min-w-0">
           <h3 className="truncate text-lg font-bold text-slate-900">{subscription.name}</h3>
-          <p className="mt-1 text-sm font-bold text-teal-700">{formatPrice(subscription)}</p>
+          <p className="mt-1 text-[15px] leading-6 font-bold text-teal-700 sm:text-sm">{formatPrice(subscription)}</p>
         </div>
         <div className="flex flex-wrap gap-1.5 min-[420px]:shrink-0 min-[420px]:justify-end">
           <ReminderBadge nextRenewalDate={subscription.nextRenewalDate} />
@@ -155,7 +155,7 @@ function SubscriptionCard({ isUpdatingPaymentStatus, onDelete, onEdit, onMarkAsP
         </div>
       </div>
 
-      <dl className="mt-4 grid gap-3 border-y border-slate-100 py-4 text-sm sm:mt-5">
+      <dl className="mt-4 grid gap-3 border-y border-slate-100 py-4 text-[15px] leading-6 sm:mt-5 sm:text-sm">
         <Detail label="Billing cycle" value={formatBillingCycle(subscription)} />
         <Detail label="Next renewal" value={formatDate(subscription.nextRenewalDate)} />
         <Detail label="Reminder window" value={`${getReminderDaysBefore(subscription)} days before`} />
@@ -163,7 +163,7 @@ function SubscriptionCard({ isUpdatingPaymentStatus, onDelete, onEdit, onMarkAsP
         <Detail label="Account email" value={subscription.accountEmail || 'Not added'} />
       </dl>
 
-      <label className="mt-4 block text-sm font-bold text-slate-700">
+      <label className="mt-4 block text-[15px] leading-6 font-bold text-slate-700 sm:text-sm">
         Payment readiness
         <select aria-label={`Payment readiness for ${subscription.name}`} className="field-control mt-2 font-semibold text-slate-700" disabled={isUpdatingPaymentStatus} onChange={(event) => onPaymentStatusChange(event.target.value as Subscription['paymentStatus'])} value={subscription.paymentStatus}>
           {paymentStatusOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}

@@ -183,10 +183,10 @@ export function SubscriptionForm({ subscription, onSaved, onMarkedAsPaid, onCanc
       <div className="relative border-b border-neutral-800/80 pb-5">
         <div className="flex items-center gap-2">
           <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.8)]" />
-          <p className="font-mono text-[10px] font-medium uppercase tracking-[0.18em] text-emerald-300">Local subscription record</p>
+          <p className="font-mono text-[11px] font-medium uppercase tracking-[0.16em] text-emerald-300 sm:text-[10px] sm:tracking-[0.18em]">Local subscription record</p>
         </div>
         <h2 className="mt-3 text-xl font-light tracking-[-0.025em] text-slate-900">{isEditing ? 'Edit subscription' : 'Subscription details'}</h2>
-        <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">Required fields are marked with an asterisk. Your data is saved locally on this device.</p>
+        <p className="mt-2 max-w-2xl text-[15px] leading-6 text-slate-500 sm:text-sm">Required fields are marked with an asterisk. Your data is saved locally on this device.</p>
       </div>
 
       {error && <p className="feedback-error" role="alert">{error}</p>}
@@ -247,16 +247,16 @@ export function SubscriptionForm({ subscription, onSaved, onMarkedAsPaid, onCanc
 
       {isEditing && (
         <section className="relative rounded-xl border border-neutral-800/80 bg-neutral-900/40 p-4">
-          <p className="font-mono text-[10px] font-medium uppercase tracking-[0.16em] text-emerald-300">Payment timeline</p>
+          <p className="font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-emerald-300 sm:text-[10px] sm:tracking-[0.16em]">Payment timeline</p>
           <h3 className="mt-2 text-base font-semibold tracking-tight text-slate-900">Renewal history</h3>
-          <p className="mt-1 text-sm leading-6 text-slate-500">Manual payments recorded locally on this device.</p>
+          <p className="mt-1 text-[15px] leading-6 text-slate-500 sm:text-sm">Manual payments recorded locally on this device.</p>
           {isHistoryLoading ? (
-            <p className="mt-4 text-sm font-semibold text-slate-500">Loading renewal history...</p>
+            <p className="mt-4 text-[15px] leading-6 font-semibold text-slate-500 sm:text-sm">Loading renewal history...</p>
           ) : renewalHistory.length > 0 ? (
             <div className="mt-4 space-y-3">
               {renewalHistory.map((history) => <RenewalHistoryItem history={history} key={history.id} />)}
             </div>
-          ) : <p className="mt-4 rounded-lg border border-neutral-800 bg-neutral-950/50 px-4 py-3 text-sm leading-6 text-slate-500">No renewal history yet. Mark this subscription as paid to add the first record.</p>}
+          ) : <p className="mt-4 rounded-lg border border-neutral-800 bg-neutral-950/50 px-4 py-3 text-[15px] leading-6 text-slate-500 sm:text-sm">No renewal history yet. Mark this subscription as paid to add the first record.</p>}
         </section>
       )}
 
@@ -275,7 +275,7 @@ const inputClassName = 'field-control mt-2 min-w-0 hover:border-neutral-600 hove
 
 function Field({ children, className = '', label, required = false }: { children: ReactNode; className?: string; label: string; required?: boolean }) {
   return (
-    <label className={`group block min-w-0 font-mono text-[10px] font-medium uppercase tracking-[0.12em] text-slate-500 ${className}`}>
+    <label className={`group block min-w-0 font-mono text-xs font-medium uppercase leading-4 tracking-[0.1em] text-slate-500 sm:text-[10px] sm:tracking-[0.12em] ${className}`}>
       {label}{required && <span className="ml-1 text-emerald-300">*</span>}
       {children}
     </label>
@@ -287,10 +287,10 @@ function RenewalHistoryItem({ history }: { history: RenewalHistory }) {
   return (
     <article className="rounded-lg border border-neutral-800 bg-neutral-950/60 px-4 py-3 transition duration-200 hover:border-emerald-500/20">
       <div className="flex flex-col gap-1 min-[420px]:flex-row min-[420px]:items-center min-[420px]:justify-between">
-        <p className="text-sm font-bold text-slate-800">{history.currency} {history.amount.toLocaleString()}</p>
-        <p className="text-xs font-semibold text-slate-500">Paid {formatDateTime(history.paidDate)}</p>
+        <p className="text-[15px] leading-6 font-bold text-slate-800 sm:text-sm">{history.currency} {history.amount.toLocaleString()}</p>
+        <p className="text-sm leading-5 font-semibold text-slate-500 sm:text-xs">Paid {formatDateTime(history.paidDate)}</p>
       </div>
-      <p className="mt-2 text-sm text-slate-600">Renewal moved from <span className="font-semibold">{formatDate(history.previousRenewalDate)}</span> to <span className="font-semibold">{formatDate(history.nextRenewalDate)}</span>.</p>
+      <p className="mt-2 text-[15px] leading-6 text-slate-600 sm:text-sm">Renewal moved from <span className="font-semibold">{formatDate(history.previousRenewalDate)}</span> to <span className="font-semibold">{formatDate(history.nextRenewalDate)}</span>.</p>
     </article>
   )
 }

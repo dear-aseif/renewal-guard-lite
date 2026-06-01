@@ -51,7 +51,7 @@ function NavigationButton({ item, activePage, onSelect, mobile = false }: { item
     <button
       aria-current={isActive ? 'page' : undefined}
       className={mobile
-        ? `flex min-h-14 min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-lg px-1 py-2 text-[11px] font-bold transition duration-200 ease-out motion-safe:active:scale-[0.98] ${isActive ? 'bg-emerald-500/10 text-emerald-300' : 'text-slate-500 hover:bg-neutral-900 hover:text-emerald-300'}`
+        ? `flex min-h-14 min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-lg px-1 py-2 text-xs font-bold transition duration-200 ease-out motion-safe:active:scale-[0.98] ${isActive ? 'bg-emerald-500/10 text-emerald-300' : 'text-slate-500 hover:bg-neutral-900 hover:text-emerald-300'}`
         : `flex w-full items-center gap-3 rounded-lg px-3 py-3 text-sm font-semibold transition duration-200 ease-out motion-safe:active:scale-[0.98] ${isActive ? 'bg-emerald-500/10 text-emerald-300' : 'text-slate-500 hover:bg-neutral-900 hover:text-emerald-300'}`}
       onClick={() => onSelect(item.id)}
       type="button"
@@ -124,14 +124,14 @@ export default function App() {
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.9)]" />
-                    <p className="font-mono text-[10px] font-medium uppercase tracking-[0.2em] text-emerald-300">{content.eyebrow}</p>
+                    <p className="font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-emerald-300 sm:text-[10px] sm:tracking-[0.2em]">{content.eyebrow}</p>
                   </div>
                   <h1 className="mt-3 text-[30px] font-light leading-9 tracking-[-0.025em] text-slate-900 sm:text-4xl" id="page-title">{content.title}</h1>
-                  <p className="mt-2 max-w-xl text-sm leading-6 text-slate-500">{content.description}</p>
+                  <p className="mt-2 max-w-xl text-[15px] leading-6 text-slate-500 sm:text-sm">{content.description}</p>
                 </div>
                 <div className="hidden rounded-full border border-emerald-500/20 bg-neutral-950/70 px-3 py-2 font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-emerald-300 shadow-sm backdrop-blur sm:block">Local only</div>
               </div>
-              <div className="relative mt-5 flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-neutral-800/80 pt-3 font-mono text-[10px] uppercase tracking-[0.12em] text-slate-400">
+              <div className="relative mt-5 flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-neutral-800/80 pt-3 font-mono text-[11px] leading-4 uppercase tracking-[0.1em] text-slate-400 sm:text-[10px] sm:tracking-[0.12em]">
                 <span className="flex items-center gap-1.5"><span className="h-1 w-1 rounded-full bg-emerald-400" />Offline-first workspace</span>
                 <span>Private by default</span>
               </div>
@@ -140,7 +140,7 @@ export default function App() {
           {activePage === 'add' ? (
             <div className="space-y-5">
               {savedSubscription && (
-                <div className="flex flex-col gap-3 rounded-xl border border-emerald-500/25 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200 shadow-card backdrop-blur-xl sm:flex-row sm:items-center sm:justify-between" role="status">
+                <div className="flex flex-col gap-3 rounded-xl border border-emerald-500/25 bg-emerald-500/10 px-4 py-3 text-[15px] leading-6 text-emerald-200 sm:text-sm shadow-card backdrop-blur-xl sm:flex-row sm:items-center sm:justify-between" role="status">
                   <p><span className="font-bold">{savedMessage}</span> {savedSubscription.name} is stored on this device.</p>
                   {!editingSubscription && <button className="text-left font-semibold text-emerald-300 underline decoration-emerald-500/50 underline-offset-4 transition duration-200 ease-out hover:text-emerald-200 active:text-emerald-100" onClick={() => startEditing(savedSubscription)} type="button">Edit saved subscription</button>}
                 </div>

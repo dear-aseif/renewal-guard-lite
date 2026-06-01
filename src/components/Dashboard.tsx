@@ -95,10 +95,10 @@ export function Dashboard({ onAdd }: DashboardProps) {
       <section aria-labelledby="renewal-summary-title">
         <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="font-mono text-[10px] font-medium uppercase tracking-[0.18em] text-emerald-300">Renewal metrics</p>
+            <p className="font-mono text-[11px] font-medium uppercase tracking-[0.16em] text-emerald-300 sm:text-[10px] sm:tracking-[0.18em]">Renewal metrics</p>
             <h2 className="mt-2 text-lg font-semibold tracking-tight text-slate-900" id="renewal-summary-title">Renewal summary</h2>
           </div>
-          <p className="max-w-md text-sm leading-6 text-slate-500 sm:text-right">Totals stay separated by currency. No conversions are applied.</p>
+          <p className="max-w-md text-[15px] leading-6 text-slate-500 sm:text-right sm:text-sm">Totals stay separated by currency. No conversions are applied.</p>
         </div>
         <div className="grid gap-3 sm:grid-cols-3 md:gap-4">
           <SummaryCard code="MTH" label="This month" totals={dashboard.thisMonth} />
@@ -167,7 +167,7 @@ function DashboardSection({ children, description, title }: { children: ReactNod
     <section>
       <div className="mb-4">
         <h2 className="text-lg font-bold text-slate-900">{title}</h2>
-        <p className="mt-1 text-sm text-slate-500">{description}</p>
+        <p className="mt-1 text-[15px] leading-6 text-slate-500 sm:text-sm">{description}</p>
       </div>
       {children}
     </section>
@@ -182,15 +182,15 @@ function RenewalCard({ isUpdatingPaymentStatus, onMarkAsPaid, onPaymentStatusCha
       <div className="flex flex-col gap-3 min-[380px]:flex-row min-[380px]:items-start min-[380px]:justify-between">
         <div className="min-w-0">
           <h3 className="truncate font-bold text-slate-900">{subscription.name}</h3>
-          <p className="mt-1 text-sm font-semibold text-slate-500">{formatDate(subscription.nextRenewalDate)}</p>
+          <p className="mt-1 text-[15px] leading-6 font-semibold text-slate-500 sm:text-sm">{formatDate(subscription.nextRenewalDate)}</p>
         </div>
         <ReminderBadge nextRenewalDate={subscription.nextRenewalDate} />
       </div>
-      <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-neutral-800/80 pt-3 text-sm">
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-neutral-800/80 pt-3 text-[15px] leading-6 sm:text-sm">
         <p className="font-bold text-teal-700">{subscription.currency} {subscription.price.toLocaleString()}</p>
         <PaymentStatusBadge paymentStatus={subscription.paymentStatus} />
       </div>
-      <label className="mt-3 block font-mono text-[10px] font-medium uppercase tracking-[0.12em] text-slate-500">
+      <label className="mt-3 block font-mono text-[11px] font-medium uppercase tracking-[0.1em] text-slate-500 sm:text-[10px] sm:tracking-[0.12em]">
         Payment readiness
         <select aria-label={`Payment readiness for ${subscription.name}`} className="field-control mt-1.5 py-2.5 font-semibold text-slate-700" disabled={isUpdatingPaymentStatus} onChange={(event) => onPaymentStatusChange(event.target.value as Subscription['paymentStatus'])} value={subscription.paymentStatus}>
           {paymentStatusOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
