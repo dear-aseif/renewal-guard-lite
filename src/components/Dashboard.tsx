@@ -79,45 +79,48 @@ export function Dashboard({ onAdd }: DashboardProps) {
     }
   }
 
-  if (isLoading) return <EmptyState description="Reading your locally saved subscriptions." icon="storage" title="Loading your renewal summary..." />
+  if (isLoading) return <EmptyState description="Reading subscription data stored on this device." icon="storage" title="Preparing your renewal summary..." />
 
   if (error) return <p className="feedback-error" role="alert">{error}</p>
 
   if (subscriptions.length === 0) {
-    return <EmptyState action={<button className="btn-primary mt-5" onClick={onAdd} type="button">Add your first subscription</button>} description="Add your first subscription to see your renewal summary." icon="subscriptions" title="No subscriptions yet" />
+    return <EmptyState action={<button className="btn-primary mt-5" onClick={onAdd} type="button">Add your first subscription</button>} description="Add a subscription to start tracking upcoming payments and renewal reminders." icon="subscriptions" title="No subscriptions yet" />
   }
 
   const renderRenewalCard = (subscription: Subscription) => <RenewalCard isUpdatingPaymentStatus={updatingPaymentStatusId === subscription.id} key={subscription.id} onMarkAsPaid={() => void markAsPaid(subscription)} onPaymentStatusChange={(paymentStatus) => void updatePaymentStatus(subscription, paymentStatus)} subscription={subscription} />
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8">
       {success && <p className="feedback-success" role="status">{success}</p>}
-      <section>
-        <div className="mb-4">
-          <h2 className="text-lg font-bold text-slate-900">Renewal summary</h2>
-          <p className="mt-1 text-sm text-slate-500">Totals stay separated by currency. No conversions are applied.</p>
+      <section aria-labelledby="renewal-summary-title">
+        <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p className="font-mono text-[10px] font-medium uppercase tracking-[0.18em] text-emerald-300">Renewal metrics</p>
+            <h2 className="mt-2 text-lg font-semibold tracking-tight text-slate-900" id="renewal-summary-title">Renewal summary</h2>
+          </div>
+          <p className="max-w-md text-sm leading-6 text-slate-500 sm:text-right">Totals stay separated by currency. No conversions are applied.</p>
         </div>
-        <div className="grid gap-3 sm:grid-cols-3 sm:gap-4">
-          <SummaryCard label="This month" totals={dashboard.thisMonth} />
-          <SummaryCard label="Next 7 days" totals={dashboard.nextSevenDays} />
-          <SummaryCard label="Next 30 days" totals={dashboard.nextThirtyDays} />
+        <div className="grid gap-3 sm:grid-cols-3 md:gap-4">
+          <SummaryCard code="MTH" label="This month" totals={dashboard.thisMonth} />
+          <SummaryCard code="7D" label="Next 7 days" totals={dashboard.nextSevenDays} />
+          <SummaryCard code="30D" label="Next 30 days" totals={dashboard.nextThirtyDays} />
         </div>
       </section>
 
       <DashboardSection description="Overdue, due today, urgent, inside your reminder window, or waiting for a payment review." title="Needs Attention">
-        <RenewalCardGrid emptyDescription="Overdue renewals and payment reminders will appear here." emptyTitle="No items need attention" renderSubscription={renderRenewalCard} subscriptions={dashboard.needsAttention} />
+        <RenewalCardGrid emptyDescription="You are all caught up. Overdue renewals and payment checks will appear here when needed." emptyTitle="No items need attention" renderSubscription={renderRenewalCard} subscriptions={dashboard.needsAttention} />
       </DashboardSection>
 
       <DashboardSection description="Renewals due within 7 days that do not already need attention." title="Next 7 Days">
-        <RenewalCardGrid emptyDescription="Renewals due in the next 7 days will appear here." emptyTitle="No renewals in the next 7 days" renderSubscription={renderRenewalCard} subscriptions={dashboard.nextSevenDaysGroup} />
+        <RenewalCardGrid emptyDescription="Nothing is scheduled in this window. Renewals due within 7 days will appear here." emptyTitle="No renewals in the next 7 days" renderSubscription={renderRenewalCard} subscriptions={dashboard.nextSevenDaysGroup} />
       </DashboardSection>
 
       <DashboardSection description="Renewals due in 8–30 days that do not already appear above." title="Next 30 Days">
-        <RenewalCardGrid emptyDescription="Renewals due in the next 30 days will appear here." emptyTitle="No renewals in the next 30 days" renderSubscription={renderRenewalCard} subscriptions={dashboard.nextThirtyDaysGroup} />
+        <RenewalCardGrid emptyDescription="Nothing is scheduled in this window. Renewals due within 30 days will appear here." emptyTitle="No renewals in the next 30 days" renderSubscription={renderRenewalCard} subscriptions={dashboard.nextThirtyDaysGroup} />
       </DashboardSection>
 
       <DashboardSection description="Renewals more than 30 days away that do not already need attention." title="Later">
-        <RenewalCardGrid emptyDescription="Renewals more than 30 days away will appear here." emptyTitle="No later renewals" renderSubscription={renderRenewalCard} subscriptions={dashboard.later} />
+        <RenewalCardGrid emptyDescription="Longer-term renewals will appear here once they are more than 30 days away." emptyTitle="No later renewals" renderSubscription={renderRenewalCard} subscriptions={dashboard.later} />
       </DashboardSection>
     </div>
   )
@@ -126,20 +129,35 @@ export function Dashboard({ onAdd }: DashboardProps) {
 function RenewalCardGrid({ emptyDescription, emptyTitle, renderSubscription, subscriptions }: { emptyDescription: string; emptyTitle: string; renderSubscription: (subscription: Subscription) => ReactNode; subscriptions: Subscription[] }) {
   if (subscriptions.length === 0) return <EmptyState description={emptyDescription} icon="calendar" title={emptyTitle} />
 
-  return <div className="grid gap-3 lg:grid-cols-2">{subscriptions.map(renderSubscription)}</div>
+  return <div className="grid gap-3 sm:gap-4 lg:grid-cols-2">{subscriptions.map(renderSubscription)}</div>
 }
 
-function SummaryCard({ label, totals }: { label: string; totals: CurrencyTotals }) {
+function SummaryCard({ code, label, totals }: { code: string; label: string; totals: CurrencyTotals }) {
   const currencyTotals = Object.entries(totals) as [Subscription['currency'], number][]
+  const currencyLabel = `${currencyTotals.length} ${currencyTotals.length === 1 ? 'currency' : 'currencies'}`
 
   return (
-    <article className="ui-card p-5">
-      <p className="text-xs font-bold uppercase tracking-[0.16em] text-teal-700">{label}</p>
-      {currencyTotals.length > 0 ? (
-        <div className="mt-4 space-y-2">
-          {currencyTotals.map(([currency, total]) => <p className="text-xl font-bold tracking-tight text-slate-900" key={currency}>{currency} {total.toLocaleString()}</p>)}
+    <article className="group relative overflow-hidden rounded-xl border border-emerald-500/15 bg-neutral-950/75 p-4 shadow-card backdrop-blur-xl transition duration-200 hover:border-emerald-400/30 hover:shadow-card-hover">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-emerald-400/70 via-emerald-400/20 to-amber-400/40" />
+      <div className="pointer-events-none absolute -right-8 -top-8 h-20 w-20 rounded-full bg-emerald-500/10 blur-2xl transition duration-200 group-hover:bg-emerald-500/15" />
+      <div className="relative flex items-start justify-between gap-3">
+        <div>
+          <p className="font-mono text-[10px] font-medium uppercase tracking-[0.16em] text-slate-400">{code}</p>
+          <h3 className="mt-1 text-sm font-semibold text-slate-700">{label}</h3>
         </div>
-      ) : <p className="mt-4 text-xl font-bold tracking-tight text-slate-400">No renewals</p>}
+        <span className="mt-1 h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.8)]" />
+      </div>
+      {currencyTotals.length > 0 ? (
+        <dl className="relative mt-5 space-y-3">
+          {currencyTotals.map(([currency, total]) => (
+            <div key={currency}>
+              <dt className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-emerald-300">{currency}</dt>
+              <dd className="mt-1 break-words text-2xl font-light leading-7 tracking-[-0.03em] text-slate-900">{total.toLocaleString()}</dd>
+            </div>
+          ))}
+        </dl>
+      ) : <p className="relative mt-5 text-lg font-light tracking-tight text-slate-400">No renewals</p>}
+      <p className="relative mt-5 border-t border-neutral-800/80 pt-3 font-mono text-[10px] uppercase tracking-[0.12em] text-slate-400">{currencyLabel}</p>
     </article>
   )
 }
@@ -160,7 +178,7 @@ function RenewalCard({ isUpdatingPaymentStatus, onMarkAsPaid, onPaymentStatusCha
   const borderClass = getSubscriptionBorderClass(subscription)
 
   return (
-    <article className={`ui-card ui-card-interactive rounded-2xl p-4 ${borderClass}`}>
+    <article className={`ui-card ui-card-interactive rounded-xl p-4 ${borderClass}`}>
       <div className="flex flex-col gap-3 min-[380px]:flex-row min-[380px]:items-start min-[380px]:justify-between">
         <div className="min-w-0">
           <h3 className="truncate font-bold text-slate-900">{subscription.name}</h3>
@@ -168,13 +186,13 @@ function RenewalCard({ isUpdatingPaymentStatus, onMarkAsPaid, onPaymentStatusCha
         </div>
         <ReminderBadge nextRenewalDate={subscription.nextRenewalDate} />
       </div>
-      <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 pt-3 text-sm">
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-neutral-800/80 pt-3 text-sm">
         <p className="font-bold text-teal-700">{subscription.currency} {subscription.price.toLocaleString()}</p>
         <PaymentStatusBadge paymentStatus={subscription.paymentStatus} />
       </div>
-      <label className="mt-3 block text-xs font-bold text-slate-600">
-        Quick payment status
-        <select aria-label={`Quick payment status for ${subscription.name}`} className="field-control mt-1.5 py-2.5 font-semibold text-slate-700" disabled={isUpdatingPaymentStatus} onChange={(event) => onPaymentStatusChange(event.target.value as Subscription['paymentStatus'])} value={subscription.paymentStatus}>
+      <label className="mt-3 block font-mono text-[10px] font-medium uppercase tracking-[0.12em] text-slate-500">
+        Payment readiness
+        <select aria-label={`Payment readiness for ${subscription.name}`} className="field-control mt-1.5 py-2.5 font-semibold text-slate-700" disabled={isUpdatingPaymentStatus} onChange={(event) => onPaymentStatusChange(event.target.value as Subscription['paymentStatus'])} value={subscription.paymentStatus}>
           {paymentStatusOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
         </select>
       </label>

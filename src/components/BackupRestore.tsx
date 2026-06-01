@@ -25,7 +25,7 @@ export function BackupRestore() {
       window.setTimeout(() => URL.revokeObjectURL(downloadUrl), 0)
       localStorage.setItem(LAST_BACKUP_AT_KEY, backup.exportedAt)
       setLastBackupAt(backup.exportedAt)
-      setMessage({ text: 'Backup exported successfully. Keep the JSON file somewhere safe.', type: 'success' })
+      setMessage({ text: 'Backup downloaded. Keep the JSON file somewhere safe.', type: 'success' })
     } catch {
       setMessage({ text: 'The backup could not be exported. Please try again.', type: 'error' })
     } finally {
@@ -62,38 +62,38 @@ export function BackupRestore() {
 
   return (
     <section className="space-y-5">
-      <div className={`rounded-3xl border p-5 shadow-card sm:p-6 ${backupRecommended ? 'border-amber-200 bg-amber-50' : 'border-teal-100 bg-teal-50'}`}>
+      <div className={`rounded-xl border p-5 shadow-card backdrop-blur-xl sm:p-6 ${backupRecommended ? 'border-amber-500/35 bg-amber-500/10' : 'border-emerald-500/25 bg-emerald-500/10'}`}>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <p className={`text-xs font-bold uppercase tracking-[0.16em] ${backupRecommended ? 'text-amber-700' : 'text-teal-700'}`}>Backup status</p>
+            <p className={`font-mono text-[10px] font-medium uppercase tracking-[0.16em] ${backupRecommended ? 'text-amber-300' : 'text-emerald-300'}`}>Backup status</p>
             <h2 className="mt-2 text-lg font-bold text-slate-900">{backupRecommended ? 'Backup recommended' : 'Backup is up to date'}</h2>
             <p className="mt-1 text-sm leading-6 text-slate-600">{lastBackupAt ? `Last backup: ${formatDateTime(lastBackupAt)}` : 'Last backup: Never'}</p>
           </div>
-          <Icon className={`h-7 w-7 shrink-0 ${backupRecommended ? 'text-amber-700' : 'text-teal-700'}`} name="storage" />
+          <Icon className={`h-7 w-7 shrink-0 ${backupRecommended ? 'text-amber-300' : 'text-emerald-300'}`} name="storage" />
         </div>
       </div>
 
       {message && <p className={message.type === 'success' ? 'feedback-success' : 'feedback-error'} role={message.type === 'error' ? 'alert' : 'status'}>{message.text}</p>}
 
-      <div className="grid gap-4 md:grid-cols-2">
-        <BackupCard description="Download every locally saved subscription as a JSON file. Nothing is uploaded." title="Export JSON backup">
+      <div className="grid gap-3 sm:gap-4 md:grid-cols-2">
+        <BackupCard description="Download your subscriptions and renewal history as a JSON file. Nothing leaves this device." title="Export JSON backup">
           <button className="btn-primary mt-5 w-full" disabled={isWorking} onClick={() => void exportBackup()} type="button">Export JSON</button>
         </BackupCard>
 
-        <BackupCard description="Choose a Renewal Guard JSON backup. Existing local subscriptions are replaced only after you confirm." title="Import JSON backup">
+        <BackupCard description="Choose a Renewal Guard JSON file. Your current local data changes only after you confirm the replacement." title="Import JSON backup">
           <input accept="application/json,.json" className="hidden" onChange={(event) => void importBackup(event)} ref={fileInputRef} type="file" />
           <button className="btn-secondary mt-5 w-full" disabled={isWorking} onClick={() => fileInputRef.current?.click()} type="button">Choose JSON file</button>
         </BackupCard>
       </div>
 
-      <p className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm leading-6 text-slate-500">Manual backup only. Files stay on your device unless you choose to move them yourself.</p>
+      <p className="rounded-xl border border-neutral-800 bg-neutral-950/60 px-4 py-3 text-sm leading-6 text-slate-500">Manual backup only. Renewal Guard never uploads your JSON file. It stays on your device unless you move it yourself.</p>
     </section>
   )
 }
 
 function BackupCard({ children, description, title }: { children: ReactNode; description: string; title: string }) {
   return (
-    <article className="ui-card ui-card-interactive p-5 sm:p-6">
+    <article className="ui-card ui-card-interactive p-4 sm:p-5 md:p-6">
       <h2 className="text-lg font-bold text-slate-900">{title}</h2>
       <p className="mt-2 text-sm leading-6 text-slate-500">{description}</p>
       {children}
