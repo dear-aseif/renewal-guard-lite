@@ -1,10 +1,10 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { BackupRestore } from './components/BackupRestore'
 import { Dashboard } from './components/Dashboard'
 import { Icon, type IconName } from './components/icons'
 import { SubscriptionForm } from './components/SubscriptionForm'
 import { SubscriptionList } from './components/SubscriptionList'
-import type { Subscription } from './db/database'
+import { db, type Subscription } from './db/database'
 
 type Page = 'dashboard' | 'subscriptions' | 'add' | 'backup'
 
@@ -68,7 +68,30 @@ export default function App() {
   const [editingSubscription, setEditingSubscription] = useState<Subscription>()
   const [savedSubscription, setSavedSubscription] = useState<Subscription>()
   const [savedMessage, setSavedMessage] = useState('Saved locally.')
+  const [hasSubscriptions, setHasSubscriptions] = useState<boolean>()
   const content = pageContent[activePage]
+  const showPageHeader = activePage !== 'dashboard' || hasSubscriptions === false
+
+  useEffect(() => {
+    if (activePage !== 'dashboard') return
+
+    let isCurrent = true
+
+    async function checkForSubscriptions() {
+      try {
+        const subscriptionCount = await db.subscriptions.count()
+        if (isCurrent) setHasSubscriptions(subscriptionCount > 0)
+      } catch {
+        if (isCurrent) setHasSubscriptions(false)
+      }
+    }
+
+    void checkForSubscriptions()
+
+    return () => {
+      isCurrent = false
+    }
+  }, [activePage])
 
   function navigateTo(page: Page) {
     if (page === 'add') {
@@ -116,7 +139,7 @@ export default function App() {
           <Brand />
         </header>
         <div className="mx-auto max-w-5xl px-3 py-5 sm:px-6 sm:py-7 md:px-8 md:py-8 lg:px-12 lg:py-12">
-          <section className="relative mb-6 overflow-hidden rounded-2xl bg-[linear-gradient(to_right_bottom,rgba(16,185,129,0.28),rgba(38,38,38,0.24),rgba(245,158,11,0.18))] p-px shadow-card sm:mb-8" aria-labelledby="page-title">
+          {showPageHeader && <section className="relative mb-6 overflow-hidden rounded-2xl bg-[linear-gradient(to_right_bottom,rgba(16,185,129,0.28),rgba(38,38,38,0.24),rgba(245,158,11,0.18))] p-px shadow-card sm:mb-8" aria-labelledby="page-title">
             <div className="relative overflow-hidden rounded-[15px] border border-neutral-800/80 bg-neutral-950/85 px-4 py-5 backdrop-blur-xl sm:px-6 sm:py-6">
               <div className="pointer-events-none absolute inset-0 opacity-40 [background-image:linear-gradient(rgba(16,185,129,0.08)_1px,transparent_1px),linear-gradient(90deg,rgba(16,185,129,0.08)_1px,transparent_1px)] [background-size:24px_24px]" />
               <div className="pointer-events-none absolute -right-10 -top-12 h-36 w-36 rounded-full bg-emerald-500/10 blur-3xl" />
@@ -136,7 +159,7 @@ export default function App() {
                 <span>Private by default</span>
               </div>
             </div>
-          </section>
+          </section>}
           {activePage === 'add' ? (
             <div className="space-y-5">
               {savedSubscription && (
