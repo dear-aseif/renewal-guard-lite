@@ -16,9 +16,8 @@ type NavigationItem = {
 
 const navigationItems: NavigationItem[] = [
   { id: 'dashboard', label: 'Dashboard', icon: 'dashboard' },
-  { id: 'subscriptions', label: 'Subscriptions', icon: 'subscriptions' },
   { id: 'add', label: 'Add New', icon: 'add' },
-  { id: 'backup', label: 'Backup', icon: 'storage' },
+  { id: 'subscriptions', label: 'Subscriptions', icon: 'subscriptions' },
 ]
 
 const pageContent: Record<Page, { eyebrow: string; title: string; description: string }> = {
@@ -46,12 +45,13 @@ const pageContent: Record<Page, { eyebrow: string; title: string; description: s
 
 function NavigationButton({ item, activePage, onSelect, mobile = false }: { item: NavigationItem; activePage: Page; onSelect: (page: Page) => void; mobile?: boolean }) {
   const isActive = activePage === item.id
+  const isPrimaryMobileAction = mobile && item.id === 'add'
 
   return (
     <button
       aria-current={isActive ? 'page' : undefined}
       className={mobile
-        ? `flex min-h-14 min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-lg px-1 py-2 text-xs font-bold transition duration-200 ease-out motion-safe:active:scale-[0.98] ${isActive ? 'bg-emerald-500/10 text-emerald-300' : 'text-slate-500 hover:bg-neutral-900 hover:text-emerald-300'}`
+        ? `flex min-w-0 flex-1 flex-col items-center justify-center gap-1 px-1 text-xs font-bold transition duration-200 ease-out motion-safe:active:scale-[0.98] ${isPrimaryMobileAction ? `-mt-5 min-h-16 rounded-xl border border-emerald-400/50 bg-emerald-500 text-neutral-950 shadow-button-hover hover:bg-emerald-400 ${isActive ? 'ring-2 ring-emerald-300/60 ring-offset-2 ring-offset-neutral-950' : ''}` : `min-h-14 rounded-lg py-2 ${isActive ? 'bg-emerald-500/10 text-emerald-300' : 'text-slate-500 hover:bg-neutral-900 hover:text-emerald-300'}`}`
         : `flex w-full items-center gap-3 rounded-lg px-3 py-3 text-sm font-semibold transition duration-200 ease-out motion-safe:active:scale-[0.98] ${isActive ? 'bg-emerald-500/10 text-emerald-300' : 'text-slate-500 hover:bg-neutral-900 hover:text-emerald-300'}`}
       onClick={() => onSelect(item.id)}
       type="button"
@@ -62,6 +62,18 @@ function NavigationButton({ item, activePage, onSelect, mobile = false }: { item
   )
 }
 
+
+
+function BackupUtilityButton({ activePage, onSelect }: { activePage: Page; onSelect: (page: Page) => void }) {
+  const isActive = activePage === 'backup'
+
+  return (
+    <button aria-current={isActive ? 'page' : undefined} aria-label="Open Backup and Restore" className={`inline-flex min-h-11 items-center gap-2 rounded-lg border px-3 py-2 text-xs font-semibold transition duration-200 ease-out motion-safe:active:scale-[0.98] ${isActive ? 'border-emerald-400/50 bg-emerald-500/15 text-emerald-200' : 'border-neutral-700 bg-neutral-900/80 text-slate-500 hover:border-emerald-500/40 hover:text-emerald-300'}`} onClick={() => onSelect('backup')} type="button">
+      <Icon className="h-4 w-4" name="storage" />
+      <span className="hidden min-[380px]:inline">Backup</span>
+    </button>
+  )
+}
 
 export default function App() {
   const [activePage, setActivePage] = useState<Page>('dashboard')
@@ -135,10 +147,14 @@ export default function App() {
       </aside>
 
       <main className="lg:ml-64">
-        <header className="sticky top-0 z-10 border-b border-neutral-800 bg-neutral-950/85 px-4 py-3.5 backdrop-blur-xl lg:hidden">
+        <header className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-neutral-800 bg-neutral-950/85 px-4 py-3.5 backdrop-blur-xl lg:hidden">
           <Brand />
+          <BackupUtilityButton activePage={activePage} onSelect={navigateTo} />
         </header>
-        <div className="mx-auto max-w-5xl px-3 py-5 sm:px-6 sm:py-7 md:px-8 md:py-8 lg:px-12 lg:py-12">
+        <div className="mx-auto max-w-5xl px-3 py-5 sm:px-6 sm:py-7 md:px-8 md:py-8 lg:px-12 lg:py-8">
+          <div className="mb-5 hidden justify-end lg:flex">
+            <BackupUtilityButton activePage={activePage} onSelect={navigateTo} />
+          </div>
           {showPageHeader && <section className="relative mb-6 overflow-hidden rounded-2xl bg-[linear-gradient(to_right_bottom,rgba(16,185,129,0.28),rgba(38,38,38,0.24),rgba(245,158,11,0.18))] p-px shadow-card sm:mb-8" aria-labelledby="page-title">
             <div className="relative overflow-hidden rounded-[15px] border border-neutral-800/80 bg-neutral-950/85 px-4 py-5 backdrop-blur-xl sm:px-6 sm:py-6">
               <div className="pointer-events-none absolute inset-0 opacity-40 [background-image:linear-gradient(rgba(16,185,129,0.08)_1px,transparent_1px),linear-gradient(90deg,rgba(16,185,129,0.08)_1px,transparent_1px)] [background-size:24px_24px]" />
@@ -178,7 +194,7 @@ export default function App() {
         </div>
       </main>
 
-      <nav aria-label="Mobile navigation" className="fixed inset-x-0 bottom-0 z-20 flex border-t border-neutral-800 bg-neutral-950/90 px-2 pb-[max(0.35rem,env(safe-area-inset-bottom))] pt-1.5 shadow-[0_-10px_30px_-24px_rgba(0,0,0,0.8)] backdrop-blur-xl lg:hidden">
+      <nav aria-label="Mobile navigation" className="fixed inset-x-0 bottom-0 z-20 flex items-end gap-1 border-t border-neutral-800 bg-neutral-950/90 px-3 pb-[max(0.35rem,env(safe-area-inset-bottom))] pt-2.5 shadow-[0_-10px_30px_-24px_rgba(0,0,0,0.8)] backdrop-blur-xl lg:hidden">
         {navigationItems.map((item) => <NavigationButton activePage={activePage} item={item} key={item.id} mobile onSelect={navigateTo} />)}
       </nav>
     </div>
