@@ -111,7 +111,7 @@ export function Dashboard({ onAdd }: DashboardProps) {
         <div className="grid gap-3 md:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] md:gap-4">
           <SummaryCard active={selectedSummary === 'thisMonth'} code="MTH" description="Renewals scheduled in the current calendar month." featured label="This Month" onSelect={() => selectSummary('thisMonth')} subscriptions={dashboard.thisMonthSubscriptions} totals={dashboard.thisMonth} />
           <div className="grid grid-cols-2 gap-3 md:grid-cols-1 md:gap-4">
-            <SummaryCard active={selectedSummary === 'dueNow'} code="NOW" description="Overdue, urgent, or waiting for payment review." label="Due Now" onSelect={() => selectSummary('dueNow')} subscriptions={dashboard.dueNow} totals={dashboard.dueNowTotals} />
+            <SummaryCard active={selectedSummary === 'dueNow'} code="NOW" description="Overdue or renewing within the next 3 days." label="Due Now" onSelect={() => selectSummary('dueNow')} subscriptions={dashboard.dueNow} totals={dashboard.dueNowTotals} />
             <SummaryCard active={selectedSummary === 'nextSevenDays'} code="7D" description="Renewals scheduled from today through the next 7 days." label="Next 7 Days" onSelect={() => selectSummary('nextSevenDays')} subscriptions={dashboard.nextSevenDaysSubscriptions} totals={dashboard.nextSevenDays} />
           </div>
         </div>
@@ -153,11 +153,11 @@ function SummaryCard({ active, code, description, featured = false, label, onSel
       </span>
       <span className={`relative mt-2 max-w-md text-[15px] leading-6 text-slate-500 sm:block sm:text-sm ${featured ? 'block' : 'hidden'}`}>{description}</span>
       {currencyTotals.length > 0 ? (
-        <span className={`relative mt-5 grid gap-3 ${featured ? 'sm:grid-cols-2' : ''}`}>
+        <span className="relative mt-5 flex flex-wrap gap-x-5 gap-y-3">
           {currencyTotals.map(([currency, total]) => (
-            <span className="block" key={currency}>
-              <span className="block font-mono text-[11px] font-medium uppercase tracking-[0.12em] text-emerald-300 sm:text-[10px]">{currency}</span>
-              <span className={`${featured ? 'text-3xl leading-9' : 'text-xl leading-7 sm:text-2xl'} mt-1 block break-words font-light tracking-[-0.03em] text-slate-900`}>{total.toLocaleString()}</span>
+            <span className="inline-flex min-w-0 items-baseline gap-1.5 whitespace-nowrap" key={currency}>
+              <span className="font-mono text-[11px] font-medium uppercase tracking-[0.12em] text-emerald-300 sm:text-[10px]">{currency}</span>
+              <span className={`${featured ? 'text-3xl leading-9' : 'text-xl leading-7 sm:text-2xl'} font-light tracking-[-0.03em] text-slate-900`}>{total.toLocaleString()}</span>
             </span>
           ))}
         </span>
@@ -168,35 +168,43 @@ function SummaryCard({ active, code, description, featured = false, label, onSel
 }
 
 function getSelectedSummaryContent(dashboard: ReturnType<typeof buildDashboardData>, selectedSummary: SummaryFilter) {
-  if (selectedSummary === 'dueNow') return { emptyDescription: 'Nothing is overdue, urgent, or waiting for an immediate payment review.', emptyTitle: 'Nothing is due now', subscriptions: dashboard.dueNow, title: 'Due Now' }
+  if (selectedSummary === 'dueNow') return { emptyDescription: 'Nothing is overdue or renewing within the next 3 days.', emptyTitle: 'Nothing is due now', subscriptions: dashboard.dueNow, title: 'Due Now' }
   if (selectedSummary === 'nextSevenDays') return { emptyDescription: 'No subscriptions renew from today through the next 7 days.', emptyTitle: 'No renewals in the next 7 days', subscriptions: dashboard.nextSevenDaysSubscriptions, title: 'Next 7 Days' }
   return { emptyDescription: 'No subscriptions renew during the current calendar month.', emptyTitle: 'No renewals this month', subscriptions: dashboard.thisMonthSubscriptions, title: 'This Month' }
 }
 
 
 function RenewalCard({ isUpdatingPaymentStatus, onMarkAsPaid, onPaymentStatusChange, subscription }: { isUpdatingPaymentStatus: boolean; onMarkAsPaid: () => void; onPaymentStatusChange: (paymentStatus: Subscription['paymentStatus']) => void; subscription: Subscription }) {
+  const [isExpanded, setIsExpanded] = useState(false)
   const borderClass = getSubscriptionBorderClass(subscription)
 
   return (
-    <article className={`ui-card ui-card-interactive rounded-xl p-4 ${borderClass}`}>
-      <div className="flex flex-col gap-3 min-[380px]:flex-row min-[380px]:items-start min-[380px]:justify-between">
-        <div className="min-w-0">
+    <article className={`ui-card ui-card-interactive rounded-xl ${borderClass}`}>
+      <button aria-expanded={isExpanded} aria-label={`${isExpanded ? 'Collapse' : 'Expand'} ${subscription.name} subscription details`} className="flex w-full items-center gap-3 rounded-xl p-3 text-left transition duration-200 hover:bg-neutral-900/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-400 sm:p-4" onClick={() => setIsExpanded((currentState) => !currentState)} type="button">
+        <div className="min-w-0 flex-1">
           <h3 className="truncate font-bold text-slate-900">{subscription.name}</h3>
           <p className="mt-1 text-[15px] leading-6 font-semibold text-slate-500 sm:text-sm">{formatDate(subscription.nextRenewalDate)}</p>
         </div>
         <ReminderBadge nextRenewalDate={subscription.nextRenewalDate} />
-      </div>
-      <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-neutral-800/80 pt-3 text-[15px] leading-6 sm:text-sm">
-        <p className="font-bold text-teal-700">{subscription.currency} {subscription.price.toLocaleString()}</p>
-        <PaymentStatusBadge paymentStatus={subscription.paymentStatus} />
-      </div>
-      <label className="mt-3 block font-mono text-[11px] font-medium uppercase tracking-[0.1em] text-slate-500 sm:text-[10px] sm:tracking-[0.12em]">
-        Payment readiness
-        <select aria-label={`Payment readiness for ${subscription.name}`} className="field-control mt-1.5 py-2.5 font-semibold text-slate-700" disabled={isUpdatingPaymentStatus} onChange={(event) => onPaymentStatusChange(event.target.value as Subscription['paymentStatus'])} value={subscription.paymentStatus}>
-          {paymentStatusOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
-        </select>
-      </label>
-      <button className="btn-secondary mt-3 w-full min-h-10 py-2" onClick={onMarkAsPaid} type="button">Mark as Paid</button>
+        <svg aria-hidden="true" className={`h-4 w-4 shrink-0 text-emerald-300 transition duration-200 ${isExpanded ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24">
+          <path d="m6 9 6 6 6-6" />
+        </svg>
+      </button>
+      {isExpanded && (
+        <div className="border-t border-neutral-800/80 px-3 pb-3 pt-3 sm:px-4 sm:pb-4">
+          <div className="flex flex-wrap items-center justify-between gap-2 text-[15px] leading-6 sm:text-sm">
+            <p className="font-bold text-teal-700">{subscription.currency} {subscription.price.toLocaleString()}</p>
+            <PaymentStatusBadge paymentStatus={subscription.paymentStatus} />
+          </div>
+          <label className="mt-3 block font-mono text-[11px] font-medium uppercase tracking-[0.1em] text-slate-500 sm:text-[10px] sm:tracking-[0.12em]">
+            Payment readiness
+            <select aria-label={`Payment readiness for ${subscription.name}`} className="field-control mt-1.5 py-2.5 font-semibold text-slate-700" disabled={isUpdatingPaymentStatus} onChange={(event) => onPaymentStatusChange(event.target.value as Subscription['paymentStatus'])} value={subscription.paymentStatus}>
+              {paymentStatusOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+            </select>
+          </label>
+          <button className="btn-secondary mt-3 w-full min-h-10 py-2" onClick={onMarkAsPaid} type="button">Mark as Paid</button>
+        </div>
+      )}
     </article>
   )
 }
@@ -230,8 +238,6 @@ function buildDashboardData(subscriptions: Subscription[]) {
 function isDueNow(subscription: Subscription) {
   const daysUntilRenewal = differenceInDays(subscription.nextRenewalDate)
   return daysUntilRenewal <= 3
-    || subscription.paymentStatus === 'need_top_up'
-    || subscription.paymentStatus === 'review_first'
 }
 
 
