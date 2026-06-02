@@ -37,9 +37,6 @@ export function getReminderStatus(nextRenewalDate: string): ReminderStatus {
 
 export function getSubscriptionBorderClass(subscription: Subscription) {
   const reminderStatus = getReminderStatus(subscription.nextRenewalDate)
-  if (reminderStatus === 'overdue' || reminderStatus === 'today') return reminderStatusStyles[reminderStatus].borderClass
-  if (subscription.paymentStatus === 'need_top_up') return paymentStatusStyles.need_top_up.borderClass
-  if (subscription.paymentStatus === 'review_first') return paymentStatusStyles.review_first.borderClass
   return reminderStatusStyles[reminderStatus].borderClass
 }
 

@@ -18,6 +18,7 @@ export function Dashboard({ onAdd }: DashboardProps) {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+  const [toast, setToast] = useState('')
   const [updatingPaymentStatusId, setUpdatingPaymentStatusId] = useState<string>()
   const [selectedSummary, setSelectedSummary] = useState<SummaryFilter>('thisMonth')
   const selectedRenewalsRef = useRef<HTMLDivElement>(null)
@@ -45,6 +46,17 @@ export function Dashboard({ onAdd }: DashboardProps) {
 
   const dashboard = useMemo(() => buildDashboardData(subscriptions), [subscriptions])
 
+  useEffect(() => {
+    if (!toast) return
+
+    const timeout = window.setTimeout(() => setToast(''), 3200)
+    return () => window.clearTimeout(timeout)
+  }, [toast])
+
+  function showToast(message: string) {
+    setToast(message)
+  }
+
   async function updatePaymentStatus(subscription: Subscription, paymentStatus: Subscription['paymentStatus']) {
     setError('')
     setSuccess('')
@@ -55,7 +67,9 @@ export function Dashboard({ onAdd }: DashboardProps) {
       await db.subscriptions.put(updatedSubscription)
       setSubscriptions((currentSubscriptions) => currentSubscriptions.map((currentSubscription) => currentSubscription.id === updatedSubscription.id ? updatedSubscription : currentSubscription))
       const statusLabel = paymentStatusOptions.find(({ value }) => value === paymentStatus)?.label ?? paymentStatus
-      setSuccess(`${subscription.name} payment status updated to ${statusLabel}.`)
+      const message = `${subscription.name} payment status updated to ${statusLabel}.`
+      setSuccess(message)
+      showToast('Payment status updated')
     } catch {
       setError('The payment status could not be updated. Please try again.')
     } finally {
@@ -75,7 +89,9 @@ export function Dashboard({ onAdd }: DashboardProps) {
       setSubscriptions((currentSubscriptions) => currentSubscriptions
         .map((currentSubscription) => currentSubscription.id === updatedSubscription.id ? updatedSubscription : currentSubscription)
         .sort((first, second) => first.nextRenewalDate.localeCompare(second.nextRenewalDate)))
-      setSuccess(`${subscription.name} marked as paid. Next renewal: ${formatDate(updatedSubscription.nextRenewalDate)}.`)
+      const message = `${subscription.name} marked as paid. Next renewal: ${formatDate(updatedSubscription.nextRenewalDate)}.`
+      setSuccess(message)
+      showToast('Marked as paid')
     } catch (markAsPaidError) {
       setError(markAsPaidError instanceof Error ? markAsPaidError.message : 'The subscription could not be marked as paid. Please try again.')
     }
@@ -104,14 +120,14 @@ export function Dashboard({ onAdd }: DashboardProps) {
         <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="font-mono text-[11px] font-medium uppercase tracking-[0.16em] text-emerald-300 sm:text-[10px] sm:tracking-[0.18em]">Renewal metrics</p>
-            <h2 className="mt-2 text-lg font-semibold tracking-tight text-slate-900" id="renewal-summary-title">Renewal summary</h2>
+            <h2 className="mt-2 text-[30px] font-light leading-9 tracking-[-0.025em] text-slate-900 sm:text-4xl" id="renewal-summary-title">Renewal summary</h2>
           </div>
           <p className="max-w-md text-[15px] leading-6 text-slate-500 sm:text-right sm:text-sm">Select a card to review the matching renewals. Totals stay separated by currency.</p>
         </div>
         <div className="grid gap-3 md:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] md:gap-4">
           <SummaryCard active={selectedSummary === 'thisMonth'} code="MTH" description="Renewals scheduled in the current calendar month." featured label="This Month" onSelect={() => selectSummary('thisMonth')} subscriptions={dashboard.thisMonthSubscriptions} totals={dashboard.thisMonth} />
           <div className="grid grid-cols-2 gap-3 md:grid-cols-1 md:gap-4">
-            <SummaryCard active={selectedSummary === 'dueNow'} code="NOW" description="Overdue or renewing within the next 3 days." label="Due Now" onSelect={() => selectSummary('dueNow')} subscriptions={dashboard.dueNow} totals={dashboard.dueNowTotals} />
+            <SummaryCard active={selectedSummary === 'dueNow'} attention code="NOW" description="Overdue or renewing within the next 3 days." label="Due Now" onSelect={() => selectSummary('dueNow')} subscriptions={dashboard.dueNow} totals={dashboard.dueNowTotals} />
             <SummaryCard active={selectedSummary === 'nextSevenDays'} code="7D" description="Renewals scheduled from today through the next 7 days." label="Next 7 Days" onSelect={() => selectSummary('nextSevenDays')} subscriptions={dashboard.nextSevenDaysSubscriptions} totals={dashboard.nextSevenDays} />
           </div>
         </div>
@@ -126,6 +142,11 @@ export function Dashboard({ onAdd }: DashboardProps) {
           <RenewalCardGrid emptyDescription={selectedSummaryContent.emptyDescription} emptyTitle={selectedSummaryContent.emptyTitle} renderSubscription={renderRenewalCard} subscriptions={selectedSummaryContent.subscriptions} />
         </div>
       </section>
+      {toast && (
+        <div aria-live="polite" className="pointer-events-none fixed inset-x-4 bottom-24 z-40 mx-auto max-w-sm rounded-xl border border-emerald-400/35 bg-neutral-900/95 px-4 py-3 text-center text-[15px] font-semibold leading-5 text-emerald-100 shadow-card-hover backdrop-blur-xl lg:bottom-6" role="status">
+          {toast}
+        </div>
+      )}
     </div>
   )
 }
@@ -136,14 +157,17 @@ function RenewalCardGrid({ emptyDescription, emptyTitle, renderSubscription, sub
   return <div className="grid gap-3 sm:gap-4 lg:grid-cols-2">{subscriptions.map(renderSubscription)}</div>
 }
 
-function SummaryCard({ active, code, description, featured = false, label, onSelect, subscriptions, totals }: { active: boolean; code: string; description: string; featured?: boolean; label: string; onSelect: () => void; subscriptions: Subscription[]; totals: CurrencyTotals }) {
+function SummaryCard({ active, attention = false, code, description, featured = false, label, onSelect, subscriptions, totals }: { active: boolean; attention?: boolean; code: string; description: string; featured?: boolean; label: string; onSelect: () => void; subscriptions: Subscription[]; totals: CurrencyTotals }) {
   const currencyTotals = Object.entries(totals) as [Subscription['currency'], number][]
   const currencyLabel = `${currencyTotals.length} ${currencyTotals.length === 1 ? 'currency' : 'currencies'}`
+  const borderClass = attention
+    ? active ? 'border-orange-400/80 ring-1 ring-orange-400/45' : 'border-orange-500/60 hover:border-orange-400/80'
+    : active ? 'border-emerald-400/70 ring-1 ring-emerald-400/30' : 'border-neutral-700/80 hover:border-emerald-400/45'
 
   return (
-    <button aria-pressed={active} className={`group relative w-full overflow-hidden rounded-xl border bg-neutral-900/90 p-4 text-left shadow-card backdrop-blur-xl transition duration-200 ease-out motion-safe:hover:-translate-y-0.5 hover:border-emerald-400/45 hover:shadow-card-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-400 ${featured ? 'sm:min-h-64 sm:p-5' : 'p-3 sm:min-h-40 sm:p-4'} ${active ? 'border-emerald-400/70 ring-1 ring-emerald-400/30' : 'border-neutral-700/80'}`} onClick={onSelect} type="button">
+    <button aria-pressed={active} className={`group relative w-full overflow-hidden rounded-xl border bg-neutral-900/90 p-4 text-left shadow-card backdrop-blur-xl transition duration-200 ease-out motion-safe:hover:-translate-y-0.5 hover:shadow-card-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-400 ${featured ? 'sm:min-h-64 sm:p-5' : 'p-3 sm:min-h-40 sm:p-4'} ${borderClass}`} onClick={onSelect} type="button">
       <span className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-emerald-400/80 via-emerald-400/30 to-amber-400/50" />
-      <span className={`pointer-events-none absolute -right-8 -top-8 rounded-full bg-emerald-500/15 blur-2xl transition duration-200 group-hover:bg-emerald-500/20 ${featured ? 'h-28 w-28' : 'h-20 w-20'}`} />
+      <span className={`pointer-events-none absolute -right-8 -top-8 rounded-full blur-2xl transition duration-200 ${attention ? 'bg-orange-500/20 group-hover:bg-orange-500/30' : 'bg-emerald-500/15 group-hover:bg-emerald-500/20'} ${featured ? 'h-28 w-28' : 'h-20 w-20'}`} />
       <span className="relative flex items-start justify-between gap-3">
         <span>
           <span className="block font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-emerald-300 sm:text-[10px]">{code}</span>
