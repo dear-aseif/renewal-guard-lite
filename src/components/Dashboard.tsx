@@ -125,7 +125,7 @@ export function Dashboard({ onAdd }: DashboardProps) {
           </div>
           <p className="max-w-md text-[15px] leading-6 text-slate-500 sm:text-right sm:text-sm">Select a card to review the matching renewals. Totals stay separated by currency.</p>
         </div>
-        <CountSummaryCard active={selectedSummary === 'activeThisMonth'} count={dashboard.activeThisMonthSubscriptions.length} description="Subscriptions with renewal dates in the current month." label="Active This Month" onSelect={() => selectSummary('activeThisMonth')} />
+        <CountSummaryCard active={selectedSummary === 'activeThisMonth'} count={dashboard.activeThisMonthSubscriptions.length} label="Active This Month" onSelect={() => selectSummary('activeThisMonth')} />
         <div className="mt-3 grid gap-3 md:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] md:gap-4">
           <SummaryCard active={selectedSummary === 'thisMonth'} code="MTH" description="Renewals scheduled in the current calendar month." featured label="This Month" onSelect={() => selectSummary('thisMonth')} subscriptions={dashboard.thisMonthSubscriptions} totals={dashboard.thisMonth} />
           <div className="grid grid-cols-2 gap-3 md:grid-cols-1 md:gap-4">
@@ -159,23 +159,20 @@ function RenewalCardGrid({ emptyDescription, emptyTitle, renderSubscription, sub
   return <div className="grid gap-3 sm:gap-4 lg:grid-cols-2">{subscriptions.map(renderSubscription)}</div>
 }
 
-function CountSummaryCard({ active, count, description, label, onSelect }: { active: boolean; count: number; description: string; label: string; onSelect: () => void }) {
+function CountSummaryCard({ active, count, label, onSelect }: { active: boolean; count: number; label: string; onSelect: () => void }) {
   return (
-    <button aria-pressed={active} className={`group relative w-full overflow-hidden rounded-xl border bg-neutral-900/90 p-4 text-left shadow-card backdrop-blur-xl transition duration-200 ease-out motion-safe:hover:-translate-y-0.5 hover:shadow-card-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-400 sm:p-5 ${active ? 'border-emerald-400/70 ring-1 ring-emerald-400/30' : 'border-neutral-700/80 hover:border-emerald-400/45'}`} onClick={onSelect} type="button">
+    <button aria-pressed={active} className={`group relative w-full overflow-hidden rounded-xl border bg-neutral-900/90 p-3 text-left shadow-card backdrop-blur-xl transition duration-200 ease-out motion-safe:hover:-translate-y-0.5 hover:shadow-card-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-400 sm:p-4 ${active ? 'border-emerald-400/70 ring-1 ring-emerald-400/30' : 'border-neutral-700/80 hover:border-emerald-400/45'}`} onClick={onSelect} type="button">
       <span className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-emerald-400/80 via-emerald-400/30 to-amber-400/50" />
-      <span className="pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full bg-emerald-500/15 blur-2xl transition duration-200 group-hover:bg-emerald-500/20" />
-      <span className="relative flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+      <span className="pointer-events-none absolute -right-6 -top-8 h-20 w-20 rounded-full bg-emerald-500/15 blur-2xl transition duration-200 group-hover:bg-emerald-500/20" />
+      <span className="relative flex items-start justify-between gap-3">
         <span>
           <span className="block font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-emerald-300 sm:text-[10px]">Active count</span>
-          <span className="mt-2 block text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl">{label}</span>
-          <span className="mt-2 block max-w-md text-[15px] leading-6 text-slate-500 sm:text-sm">{description}</span>
+          <span className="mt-2 block text-base font-semibold tracking-tight text-slate-900 sm:text-lg">{label}</span>
         </span>
-        <span className="flex shrink-0 flex-col items-start gap-2 sm:items-end">
-          <span className={`rounded-full border px-2.5 py-1 font-mono text-[10px] font-medium uppercase tracking-[0.1em] ${active ? 'border-emerald-400/40 bg-emerald-500/15 text-emerald-200' : 'border-neutral-700 bg-neutral-800/80 text-slate-500'}`}>{active ? 'Active' : 'View'}</span>
-          <span className="text-3xl font-light leading-9 tracking-[-0.03em] text-slate-900">{count}</span>
-          <span className="font-mono text-[11px] uppercase tracking-[0.1em] text-slate-400 sm:text-[10px]">subscription{count === 1 ? '' : 's'}</span>
-        </span>
+        <span className={`rounded-full border px-2.5 py-1 font-mono text-[10px] font-medium uppercase tracking-[0.1em] ${active ? 'border-emerald-400/40 bg-emerald-500/15 text-emerald-200' : 'border-neutral-700 bg-neutral-800/80 text-slate-500'}`}>{active ? 'Active' : 'View'}</span>
       </span>
+      <span className="relative mt-4 block text-3xl font-light leading-9 tracking-[-0.03em] text-slate-900">{count}</span>
+      <span className="relative mt-2 block border-t border-neutral-700/70 pt-3 font-mono text-[11px] uppercase tracking-[0.1em] text-slate-400 sm:text-[10px]">subscriptions</span>
     </button>
   )
 }
