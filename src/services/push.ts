@@ -82,7 +82,7 @@ export async function enablePushNotifications(): Promise<PushEnableResult> {
 
     let response: Response
     try {
-      response = await fetch('/api/push/subscribe', {
+      response = await fetch('/api/push/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ endpoint, keys, deviceLabel: platformLabel() }),
@@ -112,7 +112,7 @@ export async function disablePushNotifications(): Promise<void> {
     const subscription = await registration.pushManager.getSubscription()
     if (subscription) {
       try {
-        await fetch('/api/push/unsubscribe', {
+        await fetch('/api/push/unregister', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ endpoint: subscription.endpoint }),

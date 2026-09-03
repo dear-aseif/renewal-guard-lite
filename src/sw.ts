@@ -74,7 +74,7 @@ self.addEventListener('pushsubscriptionchange', ((event: Event) => {
     const endpoint = subscription.endpoint
     const keys = subscription.toJSON().keys as { p256dh: string; auth: string } | undefined
     if (keys) {
-      await fetch('/api/push/subscribe', {
+      await fetch('/api/push/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ endpoint, keys }),
