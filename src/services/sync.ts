@@ -162,7 +162,16 @@ async function pullRemote() {
 
   const data = (await response.json()) as SyncPullResponse
   await mergePull(data)
-  await db.syncMeta.put({ key: LAST_SYNCED_AT_KEY, value: data.serverTime })
+
+  // Advance the checkpoint to the newest updatedAt we actually processed,
+  // not the server clock, so the next incremental pull cannot skip records.
+  const updatedAts = data.subscriptions
+    .map((subscription) => subscription.updatedAt)
+    .concat(data.deletedIds.map((deleted) => deleted.updatedAt))
+  const newestUpdatedAt = updatedAts.length > 0 ? updatedAts.sort()[updatedAts.length - 1] : undefined
+  if (newestUpdatedAt) {
+    await db.syncMeta.put({ key: LAST_SYNCED_AT_KEY, value: newestUpdatedAt })
+  }
 
   // Clear the entire outbox only after both push and pull succeeded.
   await db.outbox.clear()
