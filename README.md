@@ -20,7 +20,7 @@ The current version includes:
 - A quick payment-status selector on subscription cards for immediate local updates.
 - A per-subscription visual reminder window with 1, 3, 7, 14, or 30-day options.
 - A simple local renewal history created whenever a subscription is marked as paid.
-- A lightweight web app manifest and service worker with an offline app-shell fallback.
+- A lightweight web app manifest and service worker (via `vite-plugin-pwa`) that precaches all build assets so the app opens fully offline.
 - A calm, mobile-first personal-finance visual style with clearer cards, buttons, status chips, and empty states.
 
 ## Preview locally
@@ -93,7 +93,7 @@ Then open the local URL printed by Vite, usually `http://localhost:5173`.
 1. Add a new subscription and confirm that **Remind me before renewal** defaults to **7 days before**.
 2. Save subscriptions with renewal dates 1, 3, 7, 14, and 30 days from today, selecting the matching reminder window for each one.
 3. Open **Dashboard** and confirm that subscriptions inside their selected reminder windows appear in **Needs Attention**.
-4. Edit one subscription and reduce its reminder window so its renewal date is outside that window. Return to **Dashboard** and confirm that it is no longer shown in **Needs Attention**, unless it is overdue or still marked **Need Top Up**.
+4. Edit one subscription and reduce its reminder window so its renewal date is outside that window. Return to **Dashboard** and confirm that it is no longer shown in **Needs Attention**, unless its renewal is still overdue or due today.
 5. Confirm that existing subscriptions created before this phase continue to work with a default 7-day reminder window.
 6. Export a JSON backup and confirm that each exported subscription includes `reminderDaysBefore`.
 
@@ -103,11 +103,11 @@ The Dashboard displays each subscription once. Items that need attention take pr
 
 1. Add an overdue subscription and confirm that it appears in **Needs Attention**.
 2. Add renewals for today and 1–3 days from today. Confirm that they appear in **Needs Attention**.
-3. Add subscriptions marked **Need Top Up** and **Review First**. Confirm that they appear in **Needs Attention**, even if their dates are more than 30 days away.
+3. Add subscriptions marked **Need Top Up** and **Review First** whose renewal is inside their reminder window. Confirm that they appear in **Needs Attention**. Add another **Need Top Up** or **Review First** subscription whose renewal is more than its reminder window away (for example, 45 days away with a 7-day window). Confirm that it does NOT appear in **Needs Attention**, and instead flows into the matching future date group below.
 4. Add a renewal 5 days from today with a 3-day reminder window. Confirm that it appears in **Next 7 Days**.
 5. Add a renewal 20 days from today with a 14-day reminder window. Confirm that it appears in **Next 30 Days**.
 6. Add a renewal 45 days from today with payment status **Ready**. Confirm that it appears in **Later**.
-7. Confirm that each subscription appears in only one Dashboard section. For example, a **Need Top Up** subscription due in 5 days appears only in **Needs Attention**, not again in **Next 7 Days**.
+7. Confirm that each subscription appears in only one Dashboard section. For example, a **Need Top Up** subscription due in 5 days (inside its 7-day reminder window) appears only in **Needs Attention**, not again in **Next 7 Days**.
 8. Check a narrow mobile viewport and a desktop viewport to confirm that the section cards remain readable.
 
 ## Test renewal history
@@ -143,9 +143,9 @@ The Dashboard displays each subscription once. Items that need attention take pr
 ## Test offline readiness
 
 1. Run `npm run build` and `npm run preview`.
-2. Open the preview URL once while online so the service worker can cache the app shell and loaded assets.
+2. Open the preview URL once while online so the service worker registers and precaches the app shell and all hashed build assets.
 3. In browser developer tools, switch the network setting to **Offline**.
-4. Reload the app and confirm that the interface opens and locally saved IndexedDB subscriptions remain available.
+4. Reload the app and confirm that the full interface and locally saved IndexedDB subscriptions remain available, including a fresh navigation that was not visited before going offline.
 5. Check a narrow mobile viewport and a desktop viewport to confirm that navigation, cards, badges, and empty states remain readable.
 
 ## Production preview

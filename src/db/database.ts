@@ -51,6 +51,13 @@ class RenewalGuardDatabase extends Dexie {
       renewalHistory: 'id, subscriptionId, paidDate',
     })
   }
+
+  async deleteSubscriptionCascade(id: string) {
+    await this.transaction('rw', this.subscriptions, this.renewalHistory, async () => {
+      await this.renewalHistory.where('subscriptionId').equals(id).delete()
+      await this.subscriptions.delete(id)
+    })
+  }
 }
 
 export const db = new RenewalGuardDatabase()

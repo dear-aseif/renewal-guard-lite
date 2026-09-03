@@ -21,7 +21,9 @@ export function BackupRestore() {
       const link = document.createElement('a')
       link.href = downloadUrl
       link.download = `renewal-guard-backup-${backup.exportedAt.slice(0, 10)}.json`
+      document.body.appendChild(link)
       link.click()
+      link.remove()
       window.setTimeout(() => URL.revokeObjectURL(downloadUrl), 0)
       localStorage.setItem(LAST_BACKUP_AT_KEY, backup.exportedAt)
       setLastBackupAt(backup.exportedAt)

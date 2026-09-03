@@ -247,7 +247,7 @@ function RenewalCard({ isUpdatingPaymentStatus, onMarkAsPaid, onPaymentStatusCha
               {paymentStatusOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
             </select>
           </label>
-          <button className="btn-secondary mt-3 w-full min-h-10 py-2" onClick={onMarkAsPaid} type="button">Mark as Paid</button>
+          <button className="btn-secondary mt-3 w-full min-h-10 py-2" disabled={isUpdatingPaymentStatus} onClick={onMarkAsPaid} type="button">Mark as Paid</button>
         </div>
       )}
     </article>
@@ -279,7 +279,6 @@ function buildDashboardData(subscriptions: Subscription[]) {
     nextSevenDaysSubscriptions,
   }
 }
-
 
 
 function isActiveSubscription(subscription: Subscription) {
