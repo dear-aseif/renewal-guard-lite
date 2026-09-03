@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
-import { getSessionSecret, isSessionTokenValid } from '../lib/auth.js'
-import { getDb } from '../lib/db.js'
+import { getSessionSecret, isSessionTokenValid } from '../../lib/auth.js'
+import { getDb } from '../../lib/db.js'
 
 export default async function handler(request: VercelRequest, response: VercelResponse) {
   if (request.method !== 'POST') {
@@ -12,33 +12,22 @@ export default async function handler(request: VercelRequest, response: VercelRe
     return response.status(401).json({ error: 'Not authenticated.' })
   }
 
-  const { endpoint, keys, deviceLabel } = request.body ?? {}
-  if (typeof endpoint !== 'string' || !endpoint
-    || typeof keys?.p256dh !== 'string' || !keys.p256dh
-    || typeof keys?.auth !== 'string' || !keys.auth) {
-    return response.status(400).json({ error: 'endpoint, keys.p256dh and keys.auth are required.' })
+  const { endpoint } = request.body ?? {}
+  if (typeof endpoint !== 'string' || !endpoint) {
+    return response.status(400).json({ error: 'endpoint is required.' })
   }
 
   const db = getDb()
-  const now = new Date().toISOString()
 
   try {
     await db.execute({
-      sql: `
-        INSERT INTO push_subscriptions (endpoint, p256dh, auth, device_label, created_at, updated_at)
-        VALUES (?, ?, ?, ?, ?, ?)
-        ON CONFLICT (endpoint) DO UPDATE SET
-          p256dh = excluded.p256dh,
-          auth = excluded.auth,
-          device_label = excluded.device_label,
-          updated_at = excluded.updated_at
-      `,
-      args: [endpoint, keys.p256dh, keys.auth, typeof deviceLabel === 'string' ? deviceLabel : null, now, now],
+      sql: 'DELETE FROM push_subscriptions WHERE endpoint = ?',
+      args: [endpoint],
     })
     return response.status(200).json({ ok: true })
   } catch (error) {
-    console.error('push subscribe failed', error)
-    return response.status(500).json({ error: 'Push subscription could not be saved.' })
+    console.error('push unsubscribe failed', error)
+    return response.status(500).json({ error: 'Push subscription could not be removed.' })
   }
 }
 

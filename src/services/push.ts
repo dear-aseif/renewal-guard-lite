@@ -37,7 +37,9 @@ export async function hasPushSubscription(): Promise<boolean> {
   }
 }
 
-export async function enablePushNotifications(): Promise<{ ok: boolean; error?: string }> {
+export type PushEnableResult = { ok: boolean; error?: string }
+
+export async function enablePushNotifications(): Promise<PushEnableResult> {
   if (!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)) {
     return { ok: false, error: 'unsupported' }
   }
@@ -47,16 +49,26 @@ export async function enablePushNotifications(): Promise<{ ok: boolean; error?: 
     return { ok: false, error: 'not-configured' }
   }
 
-  try {
-    let permission = Notification.permission
-    if (permission === 'default') {
+  let permission = Notification.permission
+  if (permission === 'default') {
+    try {
       permission = await Notification.requestPermission()
+    } catch (error) {
+      return { ok: false, error: `permission-error: ${errorMessage(error)}` }
     }
-    if (permission !== 'granted') {
-      return { ok: false, error: permission === 'denied' ? 'denied' : 'dismissed' }
-    }
+  }
+  if (permission !== 'granted') {
+    return { ok: false, error: permission === 'denied' ? 'denied' : 'dismissed' }
+  }
 
-    const registration = await navigator.serviceWorker.ready
+  let registration: ServiceWorkerRegistration
+  try {
+    registration = await navigator.serviceWorker.ready
+  } catch (error) {
+    return { ok: false, error: `sw-not-ready: ${errorMessage(error)}` }
+  }
+
+  try {
     const existing = await registration.pushManager.getSubscription()
     const subscription = existing ?? await registration.pushManager.subscribe({
       userVisibleOnly: true,
@@ -68,18 +80,30 @@ export async function enablePushNotifications(): Promise<{ ok: boolean; error?: 
     const keys = subscriptionJson.keys as { p256dh: string; auth: string } | undefined
     if (!keys) return { ok: false, error: 'no-keys' }
 
-    const response = await fetch('/api/push/subscribe', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ endpoint, keys, deviceLabel: platformLabel() }),
-      credentials: 'same-origin',
-    })
+    let response: Response
+    try {
+      response = await fetch('/api/push/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ endpoint, keys, deviceLabel: platformLabel() }),
+        credentials: 'same-origin',
+      })
+    } catch (error) {
+      return { ok: false, error: `network-error: ${errorMessage(error)}` }
+    }
 
-    if (!response.ok) return { ok: false, error: 'server' }
+    if (!response.ok) {
+      return { ok: false, error: `server-http-${response.status}` }
+    }
     return { ok: true }
-  } catch {
-    return { ok: false, error: 'failed' }
+  } catch (error) {
+    return { ok: false, error: `subscribe-error: ${errorMessage(error)}` }
   }
+}
+
+function errorMessage(error: unknown): string {
+  if (error instanceof Error) return error.message
+  return String(error)
 }
 
 export async function disablePushNotifications(): Promise<void> {
@@ -88,7 +112,7 @@ export async function disablePushNotifications(): Promise<void> {
     const subscription = await registration.pushManager.getSubscription()
     if (subscription) {
       try {
-        await fetch('/api/push/unsubscribe', {
+        await fetch('/api/push/unregister', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ endpoint: subscription.endpoint }),
