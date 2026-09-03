@@ -1,6 +1,7 @@
 import { useEffect, useState, type FormEvent, type ReactNode } from 'react'
 import { DEFAULT_REMINDER_DAYS_BEFORE, db, reminderDaysBeforeOptions, type ReminderDaysBefore, type RenewalHistory, type Subscription } from '../db/database'
 import { markSubscriptionAsPaid } from '../utils/renewalHistory'
+import { saveSubscriptionLocally } from '../services/sync'
 import { getReminderDaysBefore } from '../utils/reminderDays'
 
 type SubscriptionFormProps = {
@@ -161,12 +162,8 @@ export function SubscriptionForm({ subscription, onSaved, onMarkedAsPaid, onCanc
         updatedAt: now,
       }
 
-      if (isEditing) {
-        await db.subscriptions.put(savedSubscription)
-      } else {
-        await db.subscriptions.add(savedSubscription)
-        setValues(emptyForm)
-      }
+      await saveSubscriptionLocally(savedSubscription)
+      if (!isEditing) setValues(emptyForm)
 
       onSaved(savedSubscription)
     } catch {

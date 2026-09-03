@@ -1,10 +1,14 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { BackupRestore } from './components/BackupRestore'
 import { Dashboard } from './components/Dashboard'
 import { Icon, type IconName } from './components/icons'
+import { Login } from './components/Login'
 import { SubscriptionForm } from './components/SubscriptionForm'
 import { SubscriptionList } from './components/SubscriptionList'
 import { db, type Subscription } from './db/database'
+import { checkAuthenticated, logout } from './services/auth'
+import { getSyncStatus, syncNow, type SyncStatus } from './services/sync'
+import { useSyncController } from './hooks/useSyncController'
 
 type Page = 'dashboard' | 'subscriptions' | 'add' | 'backup'
 
@@ -75,14 +79,90 @@ function BackupUtilityButton({ activePage, onSelect }: { activePage: Page; onSel
   )
 }
 
+function SyncIndicator({ status, lastSyncedAt, onSync }: { status: SyncStatus; lastSyncedAt: string | null; onSync: () => void }) {
+  const label = status === 'syncing' ? 'Syncing…' : status === 'offline' ? 'Offline — changes queued' : status === 'error' ? 'Sync issue' : lastSyncedAt ? 'Synced' : 'Not synced yet'
+  const dotClass = status === 'syncing' ? 'animate-pulse bg-emerald-300' : status === 'offline' ? 'bg-amber-400' : status === 'error' ? 'bg-red-400' : 'bg-emerald-400'
+
+  return (
+    <button aria-label={status === 'syncing' ? 'Syncing' : 'Sync now'} className="group inline-flex min-h-9 items-center gap-2 rounded-lg border border-neutral-700 bg-neutral-900/80 px-3 py-1.5 text-xs font-semibold text-slate-400 transition duration-200 hover:border-emerald-500/40 hover:text-emerald-300" onClick={onSync} title={lastSyncedAt ? `Last synced ${new Date(lastSyncedAt).toLocaleString()}` : undefined} type="button">
+      <span className={`h-2 w-2 rounded-full shadow-[0_0_8px_rgba(52,211,153,0.6)] ${dotClass}`} />
+      <span className="hidden sm:inline">{label}</span>
+    </button>
+  )
+}
+
+function LogoutButton({ onLogout }: { onLogout: () => void }) {
+  return (
+    <button className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-xs font-semibold text-slate-500 transition duration-200 hover:bg-neutral-900 hover:text-emerald-300" onClick={onLogout} type="button">
+      <Icon className="h-4 w-4" name="storage" />
+      <span>Sign out</span>
+    </button>
+  )
+}
+
+function SignInButton({ onSignIn }: { onSignIn: () => void }) {
+  return (
+    <button className="inline-flex min-h-9 w-full items-center gap-2 rounded-lg border border-emerald-400/40 bg-emerald-500/10 px-3 py-1.5 text-xs font-bold text-emerald-300 transition duration-200 hover:bg-emerald-500/20" onClick={onSignIn} type="button">
+      <span className="h-2 w-2 rounded-full bg-emerald-300" />
+      <span>Sign in to sync</span>
+    </button>
+  )
+}
+
+function AuthSyncControl({ authMode, lastSyncedAt, onSignIn, onSync, status }: { authMode: AuthMode; lastSyncedAt: string | null; onSignIn: () => void; onSync: () => void; status: SyncStatus }) {
+  if (authMode === 'signedIn') {
+    return <SyncIndicator lastSyncedAt={lastSyncedAt} onSync={onSync} status={status} />
+  }
+  return <SignInButton onSignIn={onSignIn} />
+}
+
+type AuthMode = 'checking' | 'signedIn' | 'local'
+
 export default function App() {
   const [activePage, setActivePage] = useState<Page>('dashboard')
   const [editingSubscription, setEditingSubscription] = useState<Subscription>()
   const [savedSubscription, setSavedSubscription] = useState<Subscription>()
   const [savedMessage, setSavedMessage] = useState('Saved locally.')
   const [hasSubscriptions, setHasSubscriptions] = useState<boolean>()
+  const [authMode, setAuthMode] = useState<AuthMode>('checking')
+  const [showLogin, setShowLogin] = useState(false)
+  const { status: syncStatus, lastSyncedAt } = useSyncController()
   const content = pageContent[activePage]
   const showPageHeader = activePage !== 'dashboard' || hasSubscriptions === false
+  const isSyncingEnabled = authMode === 'signedIn'
+
+  // Verify the session cookie on first load.
+  useEffect(() => {
+    let isCurrent = true
+
+    async function bootstrap() {
+      const authenticated = await checkAuthenticated()
+      if (!isCurrent) return
+      if (authenticated) {
+        setAuthMode('signedIn')
+        void syncNow()
+      } else {
+        // No valid session: stay offline-first and let the user choose to sign in.
+        setAuthMode('local')
+      }
+    }
+
+    void bootstrap()
+
+    return () => {
+      isCurrent = false
+    }
+  }, [])
+
+  // Re-sync whenever the app comes back online (only when signed in).
+  const handleOnline = useCallback(() => {
+    if (isSyncingEnabled && getSyncStatus() !== 'syncing') void syncNow()
+  }, [isSyncingEnabled])
+
+  useEffect(() => {
+    window.addEventListener('online', handleOnline)
+    return () => window.removeEventListener('online', handleOnline)
+  }, [handleOnline])
 
   useEffect(() => {
     if (activePage !== 'dashboard') return
@@ -104,6 +184,20 @@ export default function App() {
       isCurrent = false
     }
   }, [activePage])
+
+  if (authMode === 'checking') {
+    return <div className="flex min-h-screen items-center justify-center bg-canvas"><p className="text-sm font-semibold text-slate-500">Loading…</p></div>
+  }
+
+  if (showLogin) {
+    return <Login onContinueOffline={() => setShowLogin(false)} onLoggedIn={() => { setShowLogin(false); setAuthMode('signedIn'); void syncNow() }} />
+  }
+
+  async function handleLogout() {
+    await logout()
+    setAuthMode('local')
+    setActivePage('dashboard')
+  }
 
   function navigateTo(page: Page) {
     if (page === 'add') {
@@ -139,20 +233,30 @@ export default function App() {
         <nav aria-label="Primary navigation" className="mt-10 space-y-2">
           {navigationItems.map((item) => <NavigationButton activePage={activePage} item={item} key={item.id} onSelect={navigateTo} />)}
         </nav>
-        <div className="absolute inset-x-5 bottom-6 rounded-xl border border-emerald-500/20 bg-gradient-to-br from-emerald-500/20 to-amber-500/10 p-4 text-emerald-100 shadow-card">
-          <Icon className="h-5 w-5" name="storage" />
-          <p className="mt-3 text-sm font-bold">Offline-first</p>
-          <p className="mt-1 text-xs leading-5 text-teal-100">Your subscription data stays on this device.</p>
+        <div className="mt-8">
+          <AuthSyncControl authMode={authMode} lastSyncedAt={lastSyncedAt} onSignIn={() => setShowLogin(true)} onSync={() => void syncNow()} status={syncStatus} />
+        </div>
+        <div className="absolute inset-x-5 bottom-6 space-y-1">
+          <div className="rounded-xl border border-emerald-500/20 bg-gradient-to-br from-emerald-500/20 to-amber-500/10 p-4 text-emerald-100 shadow-card">
+            <Icon className="h-5 w-5" name="storage" />
+            <p className="mt-3 text-sm font-bold">Cloud-synced</p>
+            <p className="mt-1 text-xs leading-5 text-teal-100">Your subscriptions sync to your private database and stay safe across devices.</p>
+          </div>
+          {authMode === 'signedIn' && <LogoutButton onLogout={() => void handleLogout()} />}
         </div>
       </aside>
 
       <main className="lg:ml-64">
         <header className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-neutral-800 bg-neutral-950/85 px-4 py-3.5 backdrop-blur-xl lg:hidden">
           <Brand />
-          <BackupUtilityButton activePage={activePage} onSelect={navigateTo} />
+          <div className="flex items-center gap-2">
+            <AuthSyncControl authMode={authMode} lastSyncedAt={lastSyncedAt} onSignIn={() => setShowLogin(true)} onSync={() => void syncNow()} status={syncStatus} />
+            <BackupUtilityButton activePage={activePage} onSelect={navigateTo} />
+          </div>
         </header>
         <div className="mx-auto max-w-5xl px-3 py-5 sm:px-6 sm:py-7 md:px-8 md:py-8 lg:px-12 lg:py-8">
-          <div className="mb-5 hidden justify-end lg:flex">
+          <div className="mb-5 hidden items-center justify-end gap-2 lg:flex">
+            <AuthSyncControl authMode={authMode} lastSyncedAt={lastSyncedAt} onSignIn={() => setShowLogin(true)} onSync={() => void syncNow()} status={syncStatus} />
             <BackupUtilityButton activePage={activePage} onSelect={navigateTo} />
           </div>
           {showPageHeader && <section className="relative mb-6 overflow-hidden rounded-2xl bg-[linear-gradient(to_right_bottom,rgba(16,185,129,0.28),rgba(38,38,38,0.24),rgba(245,158,11,0.18))] p-px shadow-card sm:mb-8" aria-labelledby="page-title">

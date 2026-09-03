@@ -5,6 +5,7 @@ import { PaymentStatusBadge, ReminderBadge } from './StatusBadge'
 import { markSubscriptionAsPaid } from '../utils/renewalHistory'
 import { differenceInDays, getSubscriptionBorderClass, parseLocalDate, startOfToday } from '../utils/subscriptionStatus'
 import { changeSubscriptionPaymentStatus, paymentStatusOptions } from '../utils/paymentStatus'
+import { saveSubscriptionLocally } from '../services/sync'
 
 type CurrencyTotals = Partial<Record<Subscription['currency'], number>>
 type SummaryFilter = 'activeThisMonth' | 'thisMonth' | 'dueNow' | 'nextSevenDays'
@@ -65,7 +66,7 @@ export function Dashboard({ onAdd }: DashboardProps) {
 
     try {
       const updatedSubscription = changeSubscriptionPaymentStatus(subscription, paymentStatus)
-      await db.subscriptions.put(updatedSubscription)
+      await saveSubscriptionLocally(updatedSubscription)
       setSubscriptions((currentSubscriptions) => currentSubscriptions.map((currentSubscription) => currentSubscription.id === updatedSubscription.id ? updatedSubscription : currentSubscription))
       const statusLabel = paymentStatusOptions.find(({ value }) => value === paymentStatus)?.label ?? paymentStatus
       const message = `${subscription.name} payment status updated to ${statusLabel}.`

@@ -23,6 +23,52 @@ The current version includes:
 - A lightweight web app manifest and service worker (via `vite-plugin-pwa`) that precaches all build assets so the app opens fully offline.
 - A calm, mobile-first personal-finance visual style with clearer cards, buttons, status chips, and empty states.
 
+## v2: Cloud sync, sign in, and push notifications
+
+Renewal Guard Lite is now built to keep your data safe and remind you before renewals:
+
+- **Offline-first local mode.** The app works fully without an account and without internet. All features read and write Dexie/IndexedDB as before.
+- **Single-user sign in.** Sign in with a single password (set via the `APP_PASSWORD` environment variable). Sessions use an HttpOnly cookie.
+- **Cloud sync (Turso).** When signed in, every local change is queued in an outbox and synced to a private Turso (libSQL) database. Pull uses last-write-wins by `updatedAt`. If a device is wiped, sign in again on any device to restore all subscriptions.
+- **Push notifications (Web Push).** On Android (and other supporting browsers) you can enable notifications from the Backup page. A daily Vercel Cron checks renewals due today / in 1 day / in 3 days and sends a push through `web-push` with VAPID keys. Notifications arrive even when the app is closed.
+- **Status indicators.** The header/sidebar shows sync state (Syncing / Offline / Synced) and a one-tap sync button.
+
+### Required environment variables (Vercel)
+
+| Variable | Purpose |
+|---|---|
+| `APP_PASSWORD` | The single sign-in password (min 12 chars) |
+| `SESSION_SECRET` | Secret used to sign the session cookie (`openssl rand -hex 32`) |
+| `TURSO_DATABASE_URL` | Turso database URL (`libsql://...`) |
+| `TURSO_AUTH_TOKEN` | Turso auth token |
+| `VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` | Generate with `npx web-push generate-vapid-keys` |
+| `VAPID_SUBJECT` | `mailto:you@example.com` for the push service |
+| `CRON_SECRET` | Extra secret guarding the `/api/cron` endpoint |
+| `VITE_VAPID_PUBLIC_KEY` | Public VAPID key exposed to the client |
+
+### Setup steps (one time)
+
+1. Create a Turso database and run the schema in `migrations/001_init.sql`.
+2. Generate VAPID keys (`npx web-push generate-vapid-keys`).
+3. Set the environment variables above in the Vercel project.
+4. Deploy. Vercel serves the SPA, the `/api/*` functions, and the daily cron
+   (configured in `vercel.json`, currently 07:00 UTC).
+
+### Local development
+
+```bash
+npm install
+npm run dev        # Vite frontend only (API calls will fail until deployed,
+                   # but the app runs in offline-first local mode)
+```
+
+To run the API functions locally, install the Vercel CLI and link the project:
+
+```bash
+npx vercel link
+npx vercel dev     # serves frontend + /api/* on http://localhost:3000
+```
+
 ## Preview locally
 
 Install dependencies and start the development server:
