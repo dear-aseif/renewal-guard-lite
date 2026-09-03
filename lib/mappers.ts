@@ -1,7 +1,7 @@
 // Row mappers between Turso snake_case rows and the camelCase Subscription type.
 
-import type { SubscriptionRow, PushSubscriptionRow } from './types'
-import type { Subscription, ReminderDaysBefore } from './types'
+import type { SubscriptionRow, PushSubscriptionRow } from './types.js'
+import type { Subscription, ReminderDaysBefore } from './types.js'
 
 export function rowToSubscription(row: SubscriptionRow): Subscription {
   return {

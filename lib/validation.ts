@@ -1,7 +1,7 @@
 // Validates subscription records coming from the client before upsert,
 // mirroring the checks the app already applies on save.
 
-import type { Subscription, SubscriptionCurrency, BillingCycle, PaymentStatus, ReminderDaysBefore } from './types'
+import type { Subscription, SubscriptionCurrency, BillingCycle, PaymentStatus, ReminderDaysBefore } from './types.js'
 
 const currencies: SubscriptionCurrency[] = ['IDR', 'USD', 'EUR', 'OTHER']
 const billingCycles: BillingCycle[] = ['weekly', 'monthly', 'yearly', 'custom']
