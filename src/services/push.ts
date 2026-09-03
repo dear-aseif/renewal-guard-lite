@@ -1,19 +1,39 @@
 // Client-side push subscription helpers. Called only from a user gesture.
+//
+// Two separate concepts:
+//  - browser permission (Notification.permission): "is this site allowed to
+//    show notifications at all?"
+//  - push subscription (pushManager.getSubscription()): "is this device
+//    registered to receive pushes from our server?"
+// The UI toggle should reflect the SUBSCRIPTION, not the permission.
 
-export type PushPermissionState = 'unsupported' | 'default' | 'granted' | 'denied'
+export type PushSupportState = 'unsupported' | 'default' | 'granted' | 'denied'
 
-export async function getPermissionState(): Promise<PushPermissionState> {
-  if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+export async function getPushSupportState(): Promise<PushSupportState> {
+  if (!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)) {
     return 'unsupported'
   }
 
-  if (!('Notification' in window)) return 'unsupported'
-
   try {
     const permission = await navigator.permissions.query({ name: 'notifications' as PermissionName })
-    return permission.state as PushPermissionState
+    return permission.state as PushSupportState
   } catch {
-    return Notification.permission as PushPermissionState
+    return Notification.permission as PushSupportState
+  }
+}
+
+/** True when this device has an active push subscription in the browser. */
+export async function hasPushSubscription(): Promise<boolean> {
+  if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+    return false
+  }
+
+  try {
+    const registration = await navigator.serviceWorker.ready
+    const subscription = await registration.pushManager.getSubscription()
+    return subscription !== null
+  } catch {
+    return false
   }
 }
 
@@ -67,12 +87,16 @@ export async function disablePushNotifications(): Promise<void> {
     const registration = await navigator.serviceWorker.ready
     const subscription = await registration.pushManager.getSubscription()
     if (subscription) {
-      await fetch('/api/push/unsubscribe', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ endpoint: subscription.endpoint }),
-        credentials: 'same-origin',
-      })
+      try {
+        await fetch('/api/push/unsubscribe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ endpoint: subscription.endpoint }),
+          credentials: 'same-origin',
+        })
+      } catch {
+        // Server removal is best-effort; still unsubscribe locally.
+      }
       await subscription.unsubscribe()
     }
   } catch {
