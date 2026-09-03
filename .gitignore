@@ -3,3 +3,8 @@ dist
 .vite
 *.local
 *.tsbuildinfo
+.env
+.env.*
+!.env.example
+.vercel
+

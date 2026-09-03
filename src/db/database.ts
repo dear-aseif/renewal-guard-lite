@@ -32,9 +32,22 @@ export type Subscription = {
   updatedAt: string
 }
 
+export type OutboxEntry = {
+  id: string
+  type: 'put' | 'delete' | 'markPaid'
+  subscriptionId: string
+  subscription: Subscription
+  createdAt: string
+}
+
+export type SyncMetaKey = 'deviceId' | 'lastSyncedAt'
+export type SyncMeta = { key: SyncMetaKey; value: string }
+
 class RenewalGuardDatabase extends Dexie {
   subscriptions!: EntityTable<Subscription, 'id'>
   renewalHistory!: EntityTable<RenewalHistory, 'id'>
+  outbox!: EntityTable<OutboxEntry, 'id'>
+  syncMeta!: EntityTable<SyncMeta, 'key'>
 
   constructor() {
     super('renewalGuardLite')
@@ -49,6 +62,12 @@ class RenewalGuardDatabase extends Dexie {
     this.version(3).stores({
       subscriptions: 'id, name, nextRenewalDate, paymentStatus, createdAt',
       renewalHistory: 'id, subscriptionId, paidDate',
+    })
+    this.version(4).stores({
+      subscriptions: 'id, name, nextRenewalDate, paymentStatus, createdAt, updatedAt',
+      renewalHistory: 'id, subscriptionId, paidDate',
+      outbox: 'id, subscriptionId, createdAt',
+      syncMeta: 'key',
     })
   }
 

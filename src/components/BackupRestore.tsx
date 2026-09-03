@@ -2,6 +2,7 @@ import { useRef, useState, type ChangeEvent, type ReactNode } from 'react'
 import { db } from '../db/database'
 import { createBackup, isBackupRecommended, LAST_BACKUP_AT_KEY, parseBackup } from '../utils/backup'
 import { Icon } from './icons'
+import { NotificationSetup } from './NotificationSetup'
 
 export function BackupRestore() {
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -64,6 +65,8 @@ export function BackupRestore() {
 
   return (
     <section className="space-y-5">
+      <NotificationSetup />
+
       <div className={`rounded-xl border p-5 shadow-card backdrop-blur-xl sm:p-6 ${backupRecommended ? 'border-amber-500/35 bg-amber-500/10' : 'border-emerald-500/25 bg-emerald-500/10'}`}>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>

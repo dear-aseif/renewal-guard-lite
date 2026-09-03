@@ -3,6 +3,7 @@ import { db, type Subscription } from '../db/database'
 import { EmptyState } from './EmptyState'
 import { PaymentStatusBadge, ReminderBadge } from './StatusBadge'
 import { markSubscriptionAsPaid } from '../utils/renewalHistory'
+import { deleteSubscriptionLocally, saveSubscriptionLocally } from '../services/sync'
 import { differenceInDays, getSubscriptionBorderClass, parseLocalDate, startOfToday } from '../utils/subscriptionStatus'
 import { changeSubscriptionPaymentStatus, paymentStatusOptions } from '../utils/paymentStatus'
 import { getReminderDaysBefore } from '../utils/reminderDays'
@@ -71,7 +72,7 @@ export function SubscriptionList({ onAdd, onEdit }: SubscriptionListProps) {
     setMessage(undefined)
 
     try {
-      await db.deleteSubscriptionCascade(subscription.id)
+      await deleteSubscriptionLocally(subscription.id)
       setSubscriptions((currentSubscriptions) => currentSubscriptions.filter(({ id }) => id !== subscription.id))
       setExpandedSubscriptionId((currentId) => currentId === subscription.id ? undefined : currentId)
     } catch {
@@ -85,7 +86,7 @@ export function SubscriptionList({ onAdd, onEdit }: SubscriptionListProps) {
 
     try {
       const updatedSubscription = changeSubscriptionPaymentStatus(subscription, paymentStatus)
-      await db.subscriptions.put(updatedSubscription)
+      await saveSubscriptionLocally(updatedSubscription)
       setSubscriptions((currentSubscriptions) => currentSubscriptions.map((currentSubscription) => currentSubscription.id === updatedSubscription.id ? updatedSubscription : currentSubscription))
       const statusLabel = paymentStatusOptions.find(({ value }) => value === paymentStatus)?.label ?? paymentStatus
       setMessage({ text: `${subscription.name} payment status updated to ${statusLabel}.`, type: 'success' })
