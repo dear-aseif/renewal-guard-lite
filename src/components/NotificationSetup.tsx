@@ -37,14 +37,7 @@ export function NotificationSetup() {
         return
       }
       setSupport(await getPushSupportState())
-      const errorText = result.error === 'denied'
-        ? 'Notifications are blocked. Allow them in your browser settings, then try again.'
-        : result.error === 'unsupported'
-          ? 'This browser does not support push notifications.'
-          : result.error === 'not-configured'
-            ? 'Notifications are not configured yet on the server.'
-            : 'Could not enable notifications. Please try again.'
-      setMessage({ text: errorText, type: 'error' })
+      setMessage({ text: describeEnableError(result.error), type: 'error' })
     } finally {
       setIsWorking(false)
     }
@@ -101,4 +94,26 @@ export function NotificationSetup() {
       )}
     </article>
   )
+}
+
+function describeEnableError(error: string | undefined): string {
+  switch (error) {
+    case undefined:
+    case 'failed':
+      return 'Could not enable notifications. Please try again.'
+    case 'denied':
+      return 'Notifications are blocked. Allow them in your browser settings, then try again.'
+    case 'dismissed':
+      return 'Notification permission was not granted. Tap Enable and choose Allow when prompted.'
+    case 'unsupported':
+      return 'This browser does not support push notifications.'
+    case 'not-configured':
+      return 'Notifications are not configured yet on the server.'
+    case 'no-keys':
+      return 'The browser did not return encryption keys for this subscription.'
+    default:
+      // Surface the raw diagnostic (e.g. "subscribe-error: ...", "server-http-404")
+      // so the underlying cause is visible instead of a generic message.
+      return `Could not enable notifications (${error}).`
+  }
 }
