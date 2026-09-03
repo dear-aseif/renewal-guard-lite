@@ -71,7 +71,7 @@ export function SubscriptionList({ onAdd, onEdit }: SubscriptionListProps) {
     setMessage(undefined)
 
     try {
-      await db.subscriptions.delete(subscription.id)
+      await db.deleteSubscriptionCascade(subscription.id)
       setSubscriptions((currentSubscriptions) => currentSubscriptions.filter(({ id }) => id !== subscription.id))
       setExpandedSubscriptionId((currentId) => currentId === subscription.id ? undefined : currentId)
     } catch {
@@ -210,7 +210,7 @@ function SubscriptionCard({ expanded, isUpdatingPaymentStatus, onDelete, onEdit,
           </label>
 
           <div className="mt-4 grid grid-cols-2 gap-2 min-[420px]:flex min-[420px]:flex-wrap min-[420px]:justify-end">
-            <button className="btn-primary col-span-2 w-full px-3 py-2 min-[420px]:mr-auto min-[420px]:w-auto" onClick={onMarkAsPaid} type="button">Mark as Paid</button>
+            <button className="btn-primary col-span-2 w-full px-3 py-2 min-[420px]:mr-auto min-[420px]:w-auto" disabled={isUpdatingPaymentStatus} onClick={onMarkAsPaid} type="button">Mark as Paid</button>
             <button className="btn-ghost w-full text-teal-700 hover:bg-teal-50 hover:text-teal-800 min-[420px]:w-auto" onClick={onEdit} type="button">Edit</button>
             <button className="btn-ghost w-full text-red-600 hover:bg-red-50 hover:text-red-700 min-[420px]:w-auto" onClick={onDelete} type="button">Delete</button>
           </div>
