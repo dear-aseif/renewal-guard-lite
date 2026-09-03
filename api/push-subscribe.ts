@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
-import { getSessionSecret, isSessionTokenValid } from '../lib/auth'
-import { getDb } from '../lib/db'
+import { getSessionSecret, isSessionTokenValid } from '../lib/auth.js'
+import { getDb } from '../lib/db.js'
 
 export default async function handler(request: VercelRequest, response: VercelResponse) {
   if (request.method !== 'POST') {

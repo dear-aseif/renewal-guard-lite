@@ -1,9 +1,9 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
-import { getSessionSecret, isSessionTokenValid } from '../lib/auth'
-import { getDb } from '../lib/db'
-import { rowToSubscription, subscriptionToParams } from '../lib/mappers'
-import type { SubscriptionRow, SyncPullResponse, SyncPushRequest } from '../lib/types'
-import { isSubscription } from '../lib/validation'
+import { getSessionSecret, isSessionTokenValid } from '../lib/auth.js'
+import { getDb } from '../lib/db.js'
+import { rowToSubscription, subscriptionToUpsertParams } from '../lib/mappers.js'
+import type { SubscriptionRow, SyncPullResponse, SyncPushRequest } from '../lib/types.js'
+import { isSubscription } from '../lib/validation.js'
 
 export default async function handler(request: VercelRequest, response: VercelResponse) {
   if (!isAuthenticated(request)) {
@@ -67,7 +67,7 @@ async function handlePush(request: VercelRequest, response: VercelResponse) {
           WHERE excluded.updated_at > subscriptions.updated_at
             OR subscriptions.deleted_at IS NOT NULL
         `,
-        args: Object.values(subscriptionToParams(subscription)),
+        args: Object.values(subscriptionToUpsertParams(subscription)),
       })),
       ...body.deletes.map((deleted) => ({
         sql: `

@@ -1,7 +1,7 @@
 // Row mappers between Turso snake_case rows and the camelCase Subscription type.
 
-import type { SubscriptionRow, PushSubscriptionRow } from './types'
-import type { Subscription, ReminderDaysBefore } from './types'
+import type { SubscriptionRow, PushSubscriptionRow } from './types.js'
+import type { Subscription, ReminderDaysBefore } from './types.js'
 
 export function rowToSubscription(row: SubscriptionRow): Subscription {
   return {
@@ -39,6 +39,30 @@ export function subscriptionToParams(subscription: Subscription, deletedAt: stri
     created_at: subscription.createdAt,
     updated_at: subscription.updatedAt,
     deleted_at: deletedAt,
+  }
+}
+
+/**
+ * Params for an INSERT that writes deleted_at as a literal NULL, so the
+ * value list has exactly one entry per column placeholder.
+ */
+export function subscriptionToUpsertParams(subscription: Subscription) {
+  const params = subscriptionToParams(subscription)
+  return {
+    id: params.id,
+    name: params.name,
+    price: params.price,
+    currency: params.currency,
+    billing_cycle: params.billing_cycle,
+    custom_cycle_days: params.custom_cycle_days,
+    next_renewal_date: params.next_renewal_date,
+    payment_method: params.payment_method,
+    account_email: params.account_email,
+    payment_status: params.payment_status,
+    reminder_days_before: params.reminder_days_before,
+    notes: params.notes,
+    created_at: params.created_at,
+    updated_at: params.updated_at,
   }
 }
 

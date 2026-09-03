@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import webpush from 'web-push'
-import { getDb } from '../lib/db'
-import type { SubscriptionRow, PushSubscriptionRow } from '../lib/types'
+import { getDb } from '../lib/db.js'
+import type { SubscriptionRow, PushSubscriptionRow } from '../lib/types.js'
 
 const CRON_HEADER = 'x-vercel-cron-schedule'
 const VERIFIED_CRON_USER_AGENT = 'vercel-cron/1.0'
