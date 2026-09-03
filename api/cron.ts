@@ -28,10 +28,9 @@ export default async function handler(request: VercelRequest, response: VercelRe
 
   const db = getDb()
   const today = toDateInputValue(new Date())
-  const reminders = findReminderDays(today)
 
   try {
-    // Subscriptions renewing within the reminder window (including overdue/today).
+    // Subscriptions renewing within their reminder window, plus anything overdue.
     const subscriptionResult = await db.execute({
       sql: `SELECT * FROM subscriptions
             WHERE deleted_at IS NULL
@@ -41,15 +40,22 @@ export default async function handler(request: VercelRequest, response: VercelRe
     })
     const subscriptions = subscriptionResult.rows as unknown as SubscriptionRow[]
 
-    // Only notify each subscription once per (subscription, day).
-    const due = subscriptions.filter((subscription) => reminders.includes(subscription.next_renewal_date))
+    // Decide the notification "day key" for each subscription:
+    //  - overdue (next_renewal_date < today)  -> key 'overdue' so we notify once,
+    //    and never again until it is marked paid.
+    //  - today or future within the window     -> key = next_renewal_date so each
+    //    renewal date is notified at most once.
+    const due = subscriptions.map((subscription) => ({
+      subscription,
+      dayKey: subscription.next_renewal_date < today ? 'overdue' : subscription.next_renewal_date,
+    }))
 
     const notifiedResult = await db.execute({
-      sql: 'SELECT subscription_id FROM notified_days WHERE day = ?',
-      args: [today],
+      sql: 'SELECT subscription_id, day FROM notified_days WHERE day = ? OR day = ?',
+      args: [today, 'overdue'],
     })
-    const notifiedToday = new Set(notifiedResult.rows.map((row) => String(row.subscription_id)))
-    const fresh = due.filter((subscription) => !notifiedToday.has(subscription.id))
+    const notifiedToday = new Set(notifiedResult.rows.map((row) => `${row.subscription_id}:${row.day}`))
+    const fresh = due.filter(({ subscription, dayKey }) => !notifiedToday.has(`${subscription.id}:${dayKey}`))
 
     if (fresh.length === 0) {
       return response.status(200).json({ ok: true, notified: 0, skipped: due.length })
@@ -61,7 +67,7 @@ export default async function handler(request: VercelRequest, response: VercelRe
     let notified = 0
     const results: { id: string; status: string }[] = []
 
-    for (const subscription of fresh) {
+    for (const { subscription, dayKey } of fresh) {
       const daysLeft = differenceInDays(subscription.next_renewal_date, today)
       const title = daysLeft < 0 ? `Overdue: ${subscription.name}` : daysLeft === 0 ? `Renews today: ${subscription.name}` : `Renewal in ${daysLeft} day${daysLeft === 1 ? '' : 's'}: ${subscription.name}`
       const body = `${subscription.currency} ${subscription.price.toLocaleString()} · next renewal ${subscription.next_renewal_date}`
@@ -84,7 +90,7 @@ export default async function handler(request: VercelRequest, response: VercelRe
       }
 
       if (sentToAny) {
-        await db.execute({ sql: 'INSERT OR IGNORE INTO notified_days (subscription_id, day) VALUES (?, ?)', args: [subscription.id, today] })
+        await db.execute({ sql: 'INSERT OR IGNORE INTO notified_days (subscription_id, day) VALUES (?, ?)', args: [subscription.id, dayKey] })
         notified += 1
       }
       results.push({ id: subscription.id, status: sentToAny ? 'notified' : 'no-device' })
@@ -106,20 +112,6 @@ function isAuthorizedCron(request: VercelRequest): boolean {
 
   const secret = process.env.CRON_SECRET
   return Boolean(secret && request.query.secret === secret)
-}
-
-function findReminderDays(today: string): string[] {
-  const days: string[] = []
-  for (const offset of [0, 1, 3]) {
-    days.push(addDaysToDateInput(today, offset))
-  }
-  return days
-}
-
-function addDaysToDateInput(dateInput: string, days: number): string {
-  const date = new Date(`${dateInput}T00:00:00`)
-  date.setDate(date.getDate() + days)
-  return toDateInputValue(date)
 }
 
 function differenceInDays(dateInput: string, fromInput: string): number {
