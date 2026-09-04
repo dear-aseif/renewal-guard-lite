@@ -1,55 +1,79 @@
 ---
 version: "alpha"
-name: "Aether — Real-Time Telemetry Engine"
-description: "Aether Real Dashboard Section is designed for demonstrating application workflows and interface hierarchy. Key features include clear information density, modular panels, and interface rhythm. It is suitable for product showcases, admin panels, and analytics experiences."
+name: "Renewal Guard"
+description: "Renewal Guard is a dark, offline-first subscription reminder PWA. The interface layers the Archive UI design language onto a dark material base: lime primary accent, warm gold/honey secondary accents, a large radius family with pill controls, Inter typography, and an elevated gradient-border-shell card treatment."
 colors:
-  primary: "#10B981"
-  secondary: "#34D399"
-  tertiary: "#F59E0B"
-  neutral: "#0A0A0A"
+  primary: "#9EE66E"
+  secondary: "#FFD96A"
+  tertiary: "#EECB69"
+  neutral: "#1D1B16"
   background: "#0A0A0A"
   surface: "#171717"
-  text-primary: "#A3A3A3"
-  text-secondary: "#737373"
-  border: "#10B981"
-  accent: "#10B981"
+  text-primary: "#F5F5F5"
+  text-secondary: "#A3A3A3"
+  text-strong-secondary: "#737373"
+  border: "#9EE66E"
+  accent: "#9EE66E"
 typography:
-  headline-lg:
-    fontFamily: "System Font"
+  display-lg:
+    fontFamily: "Inter Variable"
     fontSize: "30px"
     fontWeight: 300
     lineHeight: "36px"
     letterSpacing: "-0.025em"
-  body-md:
-    fontFamily: "SFMono-Regular"
-    fontSize: "10px"
+  body-lg:
+    fontFamily: "Inter Variable"
+    fontSize: "15px"
     fontWeight: 400
-    lineHeight: "15px"
+    lineHeight: "24px"
+  body-md:
+    fontFamily: "Inter Variable"
+    fontSize: "13px"
+    fontWeight: 400
+    lineHeight: "19.5px"
+  label-lg:
+    fontFamily: "Inter Variable"
+    fontSize: "11px"
+    fontWeight: 500
+    lineHeight: "16px"
   label-md:
-    fontFamily: "System Font"
-    fontSize: "12px"
+    fontFamily: "Inter Variable"
+    fontSize: "10px"
     fontWeight: 500
     lineHeight: "16px"
 rounded:
-  md: "8px"
+  shell-outer: "26px"
+  shell-inner: "25px"
+  card: "22px"
+  card-lg: "28px"
+  card-xl: "34px"
+  pill: "100px"
 spacing:
   base: "4px"
-  sm: "1px"
-  md: "4px"
-  lg: "8px"
-  xl: "10px"
-  gap: "3px"
-  card-padding: "11px"
+  sm: "4px"
+  md: "8px"
+  lg: "12px"
+  xl: "20px"
+  gap: "12px"
+  card-padding: "16px"
   section-padding: "32px"
 components:
   button-primary:
+    backgroundColor: "{colors.primary}"
     textColor: "{colors.neutral}"
-    typography: "{typography.label-md}"
-    rounded: "{rounded.md}"
+    typography: "{typography.body-md}"
+    rounded: "{rounded.pill}"
+    padding: "10px"
+  button-secondary:
+    backgroundColor: "{colors.neutral}"
+    textColor: "{colors.primary}"
+    typography: "{typography.body-md}"
+    rounded: "{rounded.pill}"
     padding: "10px"
   card:
-    rounded: "12px"
-    padding: "16px"
+    backgroundColor: "rgba(10, 10, 10, 0.75)"
+    rounded: "{rounded.card}"
+    padding: "{spacing.card-padding}"
 ---
 
 ## Overview
@@ -57,106 +81,103 @@ components:
 - **Composition cues:**
   - Layout: Grid
   - Content Width: Bounded
-  - Framing: Glassy
+  - Framing: Elevated
   - Grid: Strong
 
 ## Colors
 
-The color system uses dark mode with #10B981 as the main accent and #0A0A0A as the neutral foundation.
+The color system uses dark mode with #9EE66E as the main accent, warm gold #FFD96A and honey #EECB69 as supporting accents, and a near-black neutral foundation carried from the #1D1B16 Archive neutral.
 
-- **Primary (#10B981):** Main accent and emphasis color.
-- **Secondary (#34D399):** Supporting accent for secondary emphasis.
-- **Tertiary (#F59E0B):** Reserved accent for supporting contrast moments.
-- **Neutral (#0A0A0A):** Neutral foundation for backgrounds, surfaces, and supporting chrome.
+- **Primary (#9EE66E):** Main accent for emphasis and action states. Replaces the former emerald palette, matching the Archive UI design language.
+- **Secondary (#FFD96A):** Supporting accent for secondary emphasis, badges, and highlight moments.
+- **Tertiary (#EECB69):** Reserved accent for supporting contrast moments.
+- **Neutral (#1D1B16):** Texture neutral — used for text on bright accents (buttons) and dark surfaces around the #0A0A0A / #171717 base.
 
-- **Usage:** Background: #0A0A0A; Surface: #171717; Text Primary: #A3A3A3; Text Secondary: #737373; Border: #10B981; Accent: #10B981
+- **Usage:** Background: #0A0A0A; Surface: #171717; Text Primary: #F5F5F5; Text Secondary: #A3A3A3; Border: rgba(158, 230, 110, 0.16); Accent: #9EE66E
 
-- **Gradients:** bg-gradient-to-t from-emerald-500/10 to-emerald-400/80, bg-gradient-to-t from-emerald-500/10 to-amber-400/80, bg-gradient-to-br from-emerald-500/20 to-amber-500/10, bg-gradient-to-br from-emerald-500/20 to-amber-500/15 via-neutral-800/20
+- **Semantic status colors (badges):** red/rose (overdue, today), orange (urgent), gold (need top up, soon), violet (review first), lime (ready, upcoming), slate (safe).
 
 ## Typography
 
-Typography pairs System Font for display hierarchy with SFMono-Regular for supporting content and interface copy.
+Typography uses Inter Variable for display, body, and label hierarchy, bundled via `@fontsource-variable/inter` so the typeface remains available offline.
 
-- **Headlines (`headline-lg`):** System Font, 30px, weight 300, line-height 36px, letter-spacing -0.025em.
-- **Body (`body-md`):** SFMono-Regular, 10px, weight 400, line-height 15px.
-- **Labels (`label-md`):** System Font, 12px, weight 500, line-height 16px.
+- **Display (`display-lg`):** Inter Variable, 30px, weight 300, line-height 36px, letter-spacing -0.025em.
+- **Body (`body-lg`):** Inter Variable, 15px, weight 400, line-height 24px. (`body-md`: 13px / 19.5px.)
+- **Labels (`label-lg`):** Inter Variable, 11px, weight 500, line-height 16px, uppercase mono-caps tracking. (`label-md`: 10px.)
 
 ## Layout
 
-Layout follows a grid composition with reusable spacing tokens. Preserve the grid, bounded structural frame before changing ornament or component styling. Use 4px as the base rhythm and let larger gaps step up from that cadence instead of introducing unrelated spacing values.
-
-Treat the page as a grid / bounded composition, and keep that framing stable when adding or remixing sections.
+Layout follows a bounded grid with reusable spacing tokens stepping from a 4px rhythm. Preserve the grid and the elevated material frame before changing ornament or component styling.
 
 - **Layout type:** Grid
 - **Content width:** Bounded
 - **Base unit:** 4px
-- **Scale:** 1px, 4px, 8px, 10px, 12px, 16px, 20px, 24px
+- **Scale:** 4px, 8px, 12px, 16px, 20px, 24px, 32px
 - **Section padding:** 32px
-- **Card padding:** 11px, 12px, 13px, 16px
-- **Gaps:** 3px, 6px, 8px, 12px
+- **Card padding:** 12px, 16px, 24px
+- **Gaps:** 12px, 16px, 20px
 
 ## Elevation & Depth
 
-Depth is communicated through glass, border contrast, and reusable shadow or blur treatments. Keep those recipes consistent across hero panels, cards, and controls so the page reads as one material system.
+Depth is communicated through elevated surfaces and a signature gradient-border shell. Keep those recipes consistent across hero panels, cards, and controls so the page reads as one material system.
 
-Surfaces should read as glass first, with borders, shadows, and blur only reinforcing that material choice.
+Surfaces should read as elevated first, with borders, shadows, and blur reinforcing that material choice.
 
-- **Surface style:** Glass
-- **Borders:** 1px #10B981; 1px #262626; 1px #404040; 1px #171717
-- **Shadows:** rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.1) 0px 1px 3px 0px, rgba(0, 0, 0, 0.1) 0px 1px 2px -1px; rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(16, 185, 129, 0.1) 0px 10px 15px -3px, rgba(16, 185, 129, 0.1) 0px 4px 6px -4px
+- **Surface style:** Elevated
+- **Borders:** 1px rgba(158, 230, 110, 0.16); 1px #262626; 1px #171717
+- **Shadows:** rgba(60, 49, 27, 0.1) 0px 18px 45px 0px; rgba(60, 49, 27, 0.12) 0px 16px 34px 0px; rgba(60, 49, 27, 0.16) 0px 24px 70px 0px
 - **Blur:** 12px, 24px
 
 ### Techniques
-- **Gradient border shell:** Use a thin gradient border shell around the main card. Wrap the surface in an outer shell with 1px padding and a 16px radius. Drive the shell with linear-gradient(to right bottom, rgba(16, 185, 129, 0.2), rgba(38, 38, 38, 0.2), rgba(245, 158, 11, 0.15)) so the edge reads like premium depth instead of a flat stroke. Keep the actual stroke understated so the gradient shell remains the hero edge treatment. Inset the real content surface inside the wrapper with a slightly smaller radius so the gradient only appears as a hairline frame.
+- **Gradient border shell:** Use a thin gradient border shell around the main card. Wrap the surface in an outer shell with 1px padding and a 26px radius. Drive the shell with `linear-gradient(120deg, rgba(158,230,110,0.7), rgba(158,230,110,0.12) 40%, rgba(255,217,106,0.28) 80%, rgba(238,203,105,0.55))` so the edge reads like premium depth instead of a flat stroke. Keep the stroke understated so the gradient shell remains the hero edge treatment. Inset the real content surface with a slightly smaller radius (25px) so the gradient only appears as a hairline frame. Applied as the `.gradient-shell` utility.
 
 ## Shapes
 
-Shapes rely on a tight radius system anchored by 2px and scaled across cards, buttons, and supporting surfaces. Icon geometry should stay compatible with that soft-to-controlled silhouette.
+Shapes rely on a soft-to-controlled radius family anchored by 22px and scaling to 28px and 34px, with pill (100px) reserved for buttons and badges.
 
-Use the radius family intentionally: larger surfaces can open up, but controls and badges should stay within the same rounded DNA instead of inventing sharper or pill-only exceptions.
-
-- **Corner radii:** 2px, 8px, 12px, 15px, 16px, 9999px
+- **Corner radii:** 22px, 25px, 26px, 28px, 34px, 100px
 - **Icon treatment:** Linear
-- **Icon sets:** Solar
+- **Icon sets:** Inline SVG (custom)
 
 ## Components
 
-Anchor interactions to the detected button styles. Reuse the existing card surface recipe for content blocks.
+Anchor interactions to the pill button styles. Reuse the existing elevated card surface recipe for content blocks.
 
 ### Buttons
-- **Primary:** text #0A0A0A, radius 8px, padding 10px, border 0px solid rgb(229, 231, 235).
+- **Primary:** background #9EE66E, text #1D1B16, radius 100px, padding 10px, elevated shadow with lime tint.
+- **Secondary:** background #1D1B16, border 1px rgba(158, 230, 110, 0.3), text #aeea77, radius 100px, padding 10px.
+- **Ghost:** transparent, text slate, radius 100px.
 
 ### Cards and Surfaces
-- **Card surface:** background rgba(10, 10, 10, 0.7), border 1px solid rgba(16, 185, 129, 0.1), radius 12px, padding 16px, shadow none.
-- **Card surface:** background rgba(10, 10, 10, 0.8), border 1px solid rgb(23, 23, 23), radius 12px, padding 16px, shadow none.
-
-### Iconography
-- **Treatment:** Linear.
-- **Sets:** Solar.
+- **Card surface:** background rgba(10, 10, 10, 0.75), border 1px rgba(158, 230, 110, 0.16), radius 22px, padding 16px, elevated warm shadow.
+- **Card surface (interactive):** hover lifts with transition duration 300ms and a stronger shadow; radius 22-28px.
+- **Summary/stat cards:** radius 22px (count) and 28px (summary), preserved accent ring when active.
 
 ## Do's and Don'ts
 
-Use these constraints to keep future generations aligned with the current system instead of drifting into adjacent styles.
+Use these constraints to keep future generations aligned with the current system instead of drifting into other palettes or styles.
 
 ### Do
-- Do use the primary palette as the main accent for emphasis and action states.
-- Do keep spacing aligned to the detected 4px rhythm.
-- Do reuse the Glass surface treatment consistently across cards and controls.
-- Do keep corner radii within the detected 2px, 8px, 12px, 15px, 16px, 9999px family.
+- Do use the lime primary palette as the main accent for emphasis and action states.
+- Do keep spacing aligned to the 4px rhythm.
+- Do reuse the Elevated surface treatment and gradient-border shell consistently across cards and controls.
+- Do keep corner radii within the 22px, 28px, 34px, 100px family, with pill reserved for buttons.
+- Do set text on bright accents (lime/gold) to the near-black #1D1B16 for contrast.
 
 ### Don't
-- Don't introduce extra accent colors outside the core palette roles unless the page needs a new semantic state.
+- Don't reintroduce the former emerald/teal accent palette as a primary motif.
 - Don't mix unrelated shadow or blur recipes that break the current depth system.
-- Don't exceed the detected moderate motion intensity without a deliberate reason.
+- Don't exceed the moderate motion intensity without a deliberate reason.
+- Don't place gray text on colored (lime/gold) backgrounds.
 
 ## Motion
 
-Motion feels controlled and interface-led across text, layout, and section transitions. Timing clusters around 300ms and 200ms. Easing favors ease and 0. Hover behavior focuses on color and stroke changes.
+Motion feels controlled and interface-led across text, layout, and section transitions. Timing clusters around 300ms and 200ms. Easing favors ease-out. Hover behavior focuses on color, border, and subtle lift.
 
 **Motion Level:** moderate
 
-**Durations:** 300ms, 200ms, 2000ms, 150ms, 1000ms
+**Durations:** 300ms, 200ms, 1000ms
 
-**Easings:** ease, 0, 1), cubic-bezier(0.4, 0.2, 0.6
+**Easings:** ease-out, cubic-bezier(0.2, 0.8, 0.2, 1)
 
-**Hover Patterns:** color, stroke
+**Hover Patterns:** color, stroke, translate
