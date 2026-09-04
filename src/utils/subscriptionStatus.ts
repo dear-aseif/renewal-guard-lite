@@ -10,8 +10,8 @@ type StatusStyle = {
 }
 
 export const paymentStatusStyles: Record<Subscription['paymentStatus'], StatusStyle> = {
-  ready: { badgeClass: 'border-emerald-500/25 bg-emerald-500/10 text-emerald-300', borderClass: 'border-neutral-800', dotClass: 'bg-emerald-400', label: 'Ready' },
-  need_top_up: { badgeClass: 'border-amber-500/35 bg-amber-500/10 text-amber-300', borderClass: 'border-amber-500/40', dotClass: 'bg-amber-400', label: 'Need Top Up' },
+  ready: { badgeClass: 'border-lime-400/25 bg-lime-400/10 text-lime-300', borderClass: 'border-neutral-800', dotClass: 'bg-lime-400', label: 'Ready' },
+  need_top_up: { badgeClass: 'border-gold-400/35 bg-gold-400/10 text-gold-300', borderClass: 'border-gold-400/40', dotClass: 'bg-gold-400', label: 'Need Top Up' },
   review_first: { badgeClass: 'border-violet-500/30 bg-violet-500/10 text-violet-300', borderClass: 'border-violet-500/35', dotClass: 'bg-violet-400', label: 'Review First' },
 }
 
@@ -19,8 +19,8 @@ export const reminderStatusStyles: Record<ReminderStatus, StatusStyle> = {
   overdue: { badgeClass: 'border-red-500/40 bg-red-500/10 text-red-300', borderClass: 'border-red-500/45', dotClass: 'bg-red-400', label: 'Overdue' },
   today: { badgeClass: 'border-rose-500/40 bg-rose-500/10 text-rose-300', borderClass: 'border-rose-500/45', dotClass: 'bg-rose-400', label: 'Today' },
   urgent: { badgeClass: 'border-orange-500/40 bg-orange-500/10 text-orange-300', borderClass: 'border-orange-500/40', dotClass: 'bg-orange-400', label: 'Urgent' },
-  soon: { badgeClass: 'border-amber-500/25 bg-amber-500/10 text-amber-300', borderClass: 'border-amber-500/25', dotClass: 'bg-amber-400', label: 'Soon' },
-  upcoming: { badgeClass: 'border-emerald-500/25 bg-emerald-500/10 text-emerald-300', borderClass: 'border-emerald-500/20', dotClass: 'bg-emerald-400', label: 'Upcoming' },
+  soon: { badgeClass: 'border-gold-400/25 bg-gold-400/10 text-gold-300', borderClass: 'border-gold-400/25', dotClass: 'bg-gold-400', label: 'Soon' },
+  upcoming: { badgeClass: 'border-lime-400/25 bg-lime-400/10 text-lime-300', borderClass: 'border-lime-400/20', dotClass: 'bg-lime-400', label: 'Upcoming' },
   safe: { badgeClass: 'border-neutral-700 bg-neutral-900/70 text-slate-500', borderClass: 'border-neutral-800', dotClass: 'bg-slate-400', label: 'Safe' },
 }
 

@@ -62,9 +62,9 @@ export function NotificationSetup() {
 
   return (
     <article className="ui-card relative overflow-hidden p-5 sm:p-6">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-emerald-400/70 via-emerald-400/20 to-amber-400/40" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-lime-400/70 via-lime-400/20 to-gold-400/40" />
       <div className="flex items-start gap-4">
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-emerald-500/25 bg-emerald-500/10 text-emerald-300">
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[14px] border border-lime-400/25 bg-lime-400/10 text-lime-300">
           <Icon className="h-5 w-5" name="calendar" />
         </div>
         <div className="min-w-0">

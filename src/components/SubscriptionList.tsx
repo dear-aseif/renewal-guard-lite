@@ -120,7 +120,7 @@ export function SubscriptionList({ onAdd, onEdit }: SubscriptionListProps) {
 
   return (
     <section className="space-y-5">
-      <div className="sticky top-16 z-10 rounded-2xl border border-emerald-500/15 bg-neutral-950/90 p-3 shadow-card backdrop-blur-xl sm:p-4 lg:top-4">
+      <div className="sticky top-16 z-10 rounded-card-lg border border-lime-400/15 bg-neutral-950/90 p-3 shadow-card backdrop-blur-xl sm:p-4 lg:top-4">
         <label className="block text-[15px] leading-6 font-bold text-slate-700 sm:text-sm" htmlFor="subscription-search">Search subscriptions</label>
         <div className="relative mt-2">
           <svg aria-hidden="true" className="pointer-events-none absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="2" viewBox="0 0 24 24">
@@ -131,7 +131,7 @@ export function SubscriptionList({ onAdd, onEdit }: SubscriptionListProps) {
         </div>
         <div aria-label="Subscription filters" className="mt-3 flex gap-2 overflow-x-auto pb-1" role="list">
           {filterOptions.map((filter) => (
-            <button aria-pressed={activeFilter === filter.value} className={`shrink-0 rounded-full border px-3 py-2 text-[13px] font-bold transition duration-200 ease-out ${activeFilter === filter.value ? 'border-emerald-400/50 bg-emerald-500/15 text-emerald-200' : 'border-neutral-700 bg-neutral-900/80 text-slate-500 hover:border-emerald-500/40 hover:text-emerald-300'}`} key={filter.value} onClick={() => setActiveFilter(filter.value)} role="listitem" type="button">
+            <button aria-pressed={activeFilter === filter.value} className={`shrink-0 rounded-pill border px-3 py-2 text-[13px] font-bold transition duration-300 ease-out ${activeFilter === filter.value ? 'border-lime-400/50 bg-lime-400/15 text-lime-200' : 'border-neutral-700 bg-neutral-900/80 text-slate-500 hover:border-lime-400/40 hover:text-lime-300'}`} key={filter.value} onClick={() => setActiveFilter(filter.value)} role="listitem" type="button">
               {filter.label}
             </button>
           ))}
@@ -183,7 +183,7 @@ function SubscriptionCard({ expanded, isUpdatingPaymentStatus, onDelete, onEdit,
             <PaymentStatusBadge paymentStatus={subscription.paymentStatus} />
           </div>
         </div>
-        <button aria-expanded={expanded} aria-label={`${expanded ? 'Collapse' : 'Expand'} ${subscription.name} subscription details`} className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-neutral-700 bg-neutral-900/80 text-emerald-300 transition duration-200 hover:border-emerald-500/40 hover:bg-neutral-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-400" onClick={onToggle} type="button">
+        <button aria-expanded={expanded} aria-label={`${expanded ? 'Collapse' : 'Expand'} ${subscription.name} subscription details`} className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] border border-neutral-700 bg-neutral-900/80 text-lime-300 transition duration-200 hover:border-lime-400/40 hover:bg-neutral-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime-400" onClick={onToggle} type="button">
           <svg aria-hidden="true" className={`h-4 w-4 transition duration-200 ${expanded ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24">
             <path d="m6 9 6 6 6-6" />
           </svg>
@@ -212,8 +212,8 @@ function SubscriptionCard({ expanded, isUpdatingPaymentStatus, onDelete, onEdit,
 
           <div className="mt-4 grid grid-cols-2 gap-2 min-[420px]:flex min-[420px]:flex-wrap min-[420px]:justify-end">
             <button className="btn-primary col-span-2 w-full px-3 py-2 min-[420px]:mr-auto min-[420px]:w-auto" disabled={isUpdatingPaymentStatus} onClick={onMarkAsPaid} type="button">Mark as Paid</button>
-            <button className="btn-ghost w-full text-teal-700 hover:bg-teal-50 hover:text-teal-800 min-[420px]:w-auto" onClick={onEdit} type="button">Edit</button>
-            <button className="btn-ghost w-full text-red-600 hover:bg-red-50 hover:text-red-700 min-[420px]:w-auto" onClick={onDelete} type="button">Delete</button>
+            <button className="btn-ghost w-full text-teal-700 hover:bg-lime-400/10 hover:text-lime-300 min-[420px]:w-auto" onClick={onEdit} type="button">Edit</button>
+            <button className="btn-ghost w-full text-red-600 hover:bg-red-500/10 hover:text-red-300 min-[420px]:w-auto" onClick={onDelete} type="button">Delete</button>
           </div>
         </div>
       )}
