@@ -174,13 +174,13 @@ export function SubscriptionForm({ subscription, onSaved, onMarkedAsPaid, onCanc
   }
 
   return (
-    <form className="relative space-y-5 overflow-hidden rounded-2xl border border-emerald-500/15 bg-neutral-950/75 p-3 shadow-card backdrop-blur-xl sm:space-y-6 sm:p-5 md:p-6" onSubmit={handleSubmit}>
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-emerald-400/70 via-emerald-400/20 to-amber-400/40" />
-      <div className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-emerald-500/10 blur-3xl" />
+    <form className="relative space-y-5 overflow-hidden rounded-card-lg border border-lime-400/15 bg-neutral-950/75 p-3 shadow-card backdrop-blur-xl sm:space-y-6 sm:p-5 md:p-6" onSubmit={handleSubmit}>
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-lime-400/70 via-lime-400/20 to-gold-400/40" />
+      <div className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-lime-400/10 blur-3xl" />
       <div className="relative border-b border-neutral-800/80 pb-5">
         <div className="flex items-center gap-2">
-          <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.8)]" />
-          <p className="font-mono text-[11px] font-medium uppercase tracking-[0.16em] text-emerald-300 sm:text-[10px] sm:tracking-[0.18em]">Local subscription record</p>
+          <span className="h-1.5 w-1.5 rounded-full bg-lime-400 shadow-[0_0_10px_rgba(158,230,110,0.8)]" />
+          <p className="font-mono text-[11px] font-medium uppercase tracking-[0.16em] text-lime-300 sm:text-[10px] sm:tracking-[0.18em]">Local subscription record</p>
         </div>
         <h2 className="mt-3 text-xl font-light tracking-[-0.025em] text-slate-900">{isEditing ? 'Edit subscription' : 'Subscription details'}</h2>
         <p className="mt-2 max-w-2xl text-[15px] leading-6 text-slate-500 sm:text-sm">Required fields are marked with an asterisk. Your data is saved locally on this device.</p>
@@ -243,8 +243,8 @@ export function SubscriptionForm({ subscription, onSaved, onMarkedAsPaid, onCanc
       </div>
 
       {isEditing && (
-        <section className="relative rounded-xl border border-neutral-800/80 bg-neutral-900/40 p-4">
-          <p className="font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-emerald-300 sm:text-[10px] sm:tracking-[0.16em]">Payment timeline</p>
+        <section className="relative rounded-card border border-neutral-800/80 bg-neutral-900/40 p-4">
+          <p className="font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-lime-300 sm:text-[10px] sm:tracking-[0.16em]">Payment timeline</p>
           <h3 className="mt-2 text-base font-semibold tracking-tight text-slate-900">Renewal history</h3>
           <p className="mt-1 text-[15px] leading-6 text-slate-500 sm:text-sm">Manual payments recorded locally on this device.</p>
           {isHistoryLoading ? (
@@ -253,7 +253,7 @@ export function SubscriptionForm({ subscription, onSaved, onMarkedAsPaid, onCanc
             <div className="mt-4 space-y-3">
               {renewalHistory.map((history) => <RenewalHistoryItem history={history} key={history.id} />)}
             </div>
-          ) : <p className="mt-4 rounded-lg border border-neutral-800 bg-neutral-950/50 px-4 py-3 text-[15px] leading-6 text-slate-500 sm:text-sm">No renewal history yet. Mark this subscription as paid to add the first record.</p>}
+          ) : <p className="mt-4 rounded-card border border-neutral-800 bg-neutral-950/50 px-4 py-3 text-[15px] leading-6 text-slate-500 sm:text-sm">No renewal history yet. Mark this subscription as paid to add the first record.</p>}
         </section>
       )}
 
@@ -273,7 +273,7 @@ const inputClassName = 'field-control mt-2 min-w-0 hover:border-neutral-600 hove
 function Field({ children, className = '', label, required = false }: { children: ReactNode; className?: string; label: string; required?: boolean }) {
   return (
     <label className={`group block min-w-0 font-mono text-xs font-medium uppercase leading-4 tracking-[0.1em] text-slate-500 sm:text-[10px] sm:tracking-[0.12em] ${className}`}>
-      {label}{required && <span className="ml-1 text-emerald-300">*</span>}
+      {label}{required && <span className="ml-1 text-lime-300">*</span>}
       {children}
     </label>
   )
@@ -282,7 +282,7 @@ function Field({ children, className = '', label, required = false }: { children
 
 function RenewalHistoryItem({ history }: { history: RenewalHistory }) {
   return (
-    <article className="rounded-lg border border-neutral-800 bg-neutral-950/60 px-4 py-3 transition duration-200 hover:border-emerald-500/20">
+    <article className="rounded-card border border-neutral-800 bg-neutral-950/60 px-4 py-3 transition duration-200 hover:border-lime-400/20">
       <div className="flex flex-col gap-1 min-[420px]:flex-row min-[420px]:items-center min-[420px]:justify-between">
         <p className="text-[15px] leading-6 font-bold text-slate-800 sm:text-sm">{history.currency} {history.amount.toLocaleString()}</p>
         <p className="text-sm leading-5 font-semibold text-slate-500 sm:text-xs">Paid {formatDateTime(history.paidDate)}</p>

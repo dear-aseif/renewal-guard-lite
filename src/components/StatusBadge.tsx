@@ -1,7 +1,7 @@
 import type { Subscription } from '../db/database'
 import { getReminderStatus, paymentStatusStyles, reminderStatusStyles } from '../utils/subscriptionStatus'
 
-const badgeClassName = 'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1.5 font-mono text-[11px] font-medium uppercase leading-none tracking-[0.06em] sm:text-[10px] sm:tracking-[0.08em] shadow-sm'
+const badgeClassName = 'inline-flex items-center gap-1.5 rounded-pill border px-2.5 py-1.5 font-mono text-[11px] font-medium uppercase leading-none tracking-[0.06em] sm:text-[10px] sm:tracking-[0.08em] shadow-sm'
 
 export function ReminderBadge({ nextRenewalDate }: { nextRenewalDate: string }) {
   const status = reminderStatusStyles[getReminderStatus(nextRenewalDate)]

@@ -26,17 +26,17 @@ export function Login({ onLoggedIn, onContinueOffline }: { onLoggedIn: () => voi
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-canvas bg-[radial-gradient(circle_at_top_right,_rgba(16,185,129,0.13),_transparent_30rem)] px-4">
+    <div className="flex min-h-screen items-center justify-center bg-canvas bg-[radial-gradient(circle_at_top_right,_rgba(158,230,110,0.13),_transparent_30rem)] px-4">
       <div className="w-full max-w-sm">
-        <div className="relative overflow-hidden rounded-2xl border border-emerald-500/15 bg-neutral-950/80 p-6 shadow-card backdrop-blur-xl">
-          <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-emerald-400/70 via-emerald-400/20 to-amber-400/40" />
+        <div className="relative overflow-hidden rounded-card-lg border border-lime-400/15 bg-neutral-950/80 p-6 shadow-card backdrop-blur-xl">
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-lime-400/70 via-lime-400/20 to-gold-400/40" />
           <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-400 text-neutral-950 shadow-button">
+            <div className="flex h-11 w-11 items-center justify-center rounded-[14px] bg-gradient-to-br from-lime-400 to-gold-400 text-inkbase shadow-button">
               <Icon className="h-6 w-6" name="shield" />
             </div>
             <div>
               <p className="text-sm font-bold tracking-tight text-slate-900">Renewal Guard</p>
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-400">Sign in</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-lime-400">Sign in</p>
             </div>
           </div>
           <h1 className="mt-6 text-2xl font-light tracking-[-0.025em] text-slate-900">Welcome back</h1>
@@ -64,7 +64,7 @@ export function Login({ onLoggedIn, onContinueOffline }: { onLoggedIn: () => voi
           </form>
 
           <div className="mt-4 border-t border-neutral-800/80 pt-4 text-center">
-            <button className="text-sm font-semibold text-slate-500 transition duration-200 hover:text-emerald-300" onClick={onContinueOffline} type="button">Continue offline — local only</button>
+            <button className="text-sm font-semibold text-slate-500 transition duration-200 hover:text-lime-300" onClick={onContinueOffline} type="button">Continue offline — local only</button>
           </div>
         </div>
         <p className="mt-4 text-center text-xs leading-5 text-slate-500">Your data syncs to your private cloud database and stays on your devices.</p>

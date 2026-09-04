@@ -67,14 +67,14 @@ export function BackupRestore() {
     <section className="space-y-5">
       <NotificationSetup />
 
-      <div className={`rounded-xl border p-5 shadow-card backdrop-blur-xl sm:p-6 ${backupRecommended ? 'border-amber-500/35 bg-amber-500/10' : 'border-emerald-500/25 bg-emerald-500/10'}`}>
+      <div className={`rounded-card-lg border p-5 shadow-card backdrop-blur-xl sm:p-6 ${backupRecommended ? 'border-gold-400/35 bg-gold-400/10' : 'border-lime-400/25 bg-lime-400/10'}`}>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <p className={`font-mono text-[11px] font-medium uppercase tracking-[0.14em] sm:text-[10px] sm:tracking-[0.16em] ${backupRecommended ? 'text-amber-300' : 'text-emerald-300'}`}>Backup status</p>
+            <p className={`font-mono text-[11px] font-medium uppercase tracking-[0.14em] sm:text-[10px] sm:tracking-[0.16em] ${backupRecommended ? 'text-gold-300' : 'text-lime-300'}`}>Backup status</p>
             <h2 className="mt-2 text-lg font-bold text-slate-900">{backupRecommended ? 'Backup recommended' : 'Backup is up to date'}</h2>
             <p className="mt-1 text-[15px] leading-6 text-slate-600 sm:text-sm">{lastBackupAt ? `Last backup: ${formatDateTime(lastBackupAt)}` : 'Last backup: Never'}</p>
           </div>
-          <Icon className={`h-7 w-7 shrink-0 ${backupRecommended ? 'text-amber-300' : 'text-emerald-300'}`} name="storage" />
+          <Icon className={`h-7 w-7 shrink-0 ${backupRecommended ? 'text-gold-300' : 'text-lime-300'}`} name="storage" />
         </div>
       </div>
 
@@ -91,7 +91,7 @@ export function BackupRestore() {
         </BackupCard>
       </div>
 
-      <p className="rounded-xl border border-neutral-800 bg-neutral-950/60 px-4 py-3 text-[15px] leading-6 text-slate-500 sm:text-sm">Manual backup only. Renewal Guard never uploads your JSON file. It stays on your device unless you move it yourself.</p>
+      <p className="rounded-card border border-neutral-800 bg-neutral-950/60 px-4 py-3 text-[15px] leading-6 text-slate-500 sm:text-sm">Manual backup only. Renewal Guard never uploads your JSON file. It stays on your device unless you move it yourself.</p>
     </section>
   )
 }
